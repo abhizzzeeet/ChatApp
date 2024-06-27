@@ -11,9 +11,22 @@
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="LOGOUT">
+        android:text="LOGOUT" />
 
-    </Button>
+    <Button
+        android:id="@+id/loadContacts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Load Contacts" />
 
+    <EditText
+        android:id="@+id/searchContacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search Contacts" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewChatActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

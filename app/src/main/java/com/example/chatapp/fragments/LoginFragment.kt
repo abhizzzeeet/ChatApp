@@ -86,17 +86,24 @@ class LoginFragment : Fragment() {
         val email = etEmail.text.toString()
         val pass = etPass.text.toString()
         val mobileNo = etMobileNo.text.toString()
-        // calling signInWithEmailAndPassword(email, pass)
-        // function using Firebase auth object
-        // On successful response Display a Toast
-        auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(requireActivity()) {
-            if (it.isSuccessful) {
-                Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
-                val intent = Intent(requireContext(),ChatActivity::class.java)
-                startActivity(intent)
-            } else
-                Toast.makeText(requireContext(), "Log In failed ", Toast.LENGTH_SHORT).show()
+
+        
+        if(email.isNotEmpty() || pass.isNotEmpty() || mobileNo.isNotEmpty())
+        {
+            auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(requireActivity()) {
+                if (it.isSuccessful) {
+                    Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(requireContext(),ChatActivity::class.java)
+                    startActivity(intent)
+                } else
+                    Toast.makeText(requireContext(), "Log In failed ", Toast.LENGTH_SHORT).show()
+            }
         }
+        else
+        {
+            Toast.makeText(requireContext(),"Please fill all fields",Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 
