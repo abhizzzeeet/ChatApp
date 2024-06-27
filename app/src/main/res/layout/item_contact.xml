@@ -19,4 +19,11 @@
         android:textSize="14sp"
         android:textColor="@android:color/darker_gray" />
 
+    <Button
+        android:id="@+id/inviteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Invite"
+        android:layout_gravity="end" />
+
 </LinearLayout>

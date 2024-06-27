@@ -1,6 +1,5 @@
 package com.example.chatapp.activities
 
-
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,30 +9,39 @@ import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.MainActivity
 import com.example.chatapp.R
+import com.example.chatapp.contacts.Contact
+import com.example.chatapp.contacts.ContactsAdapter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
-import com.example.chatapp.contacts.Contact
-import com.example.chatapp.contacts.ContactsAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var mAuth: FirebaseAuth
     private lateinit var btnLogout: Button
-    private lateinit var btnLoadContacts: Button
+//    private lateinit var btnLoadContacts: Button
     private lateinit var recyclerViewContacts: RecyclerView
     private lateinit var searchContacts: EditText
+    private lateinit var progressBar: ProgressBar
     private lateinit var contactsAdapter: ContactsAdapter
     private val contactsList = mutableListOf<Contact>()
     private val filteredContactsList = mutableListOf<Contact>()
@@ -46,25 +54,25 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
-        btnLoadContacts = findViewById(R.id.loadContacts)
+//        btnLoadContacts = findViewById(R.id.loadContacts)
         searchContacts = findViewById(R.id.searchContacts)
         recyclerViewContacts = findViewById(R.id.recyclerViewChatActivity)
+        progressBar = findViewById(R.id.progressBar)
+
         recyclerViewContacts.layoutManager = LinearLayoutManager(this)
         contactsAdapter = ContactsAdapter(filteredContactsList)
         recyclerViewContacts.adapter = contactsAdapter
 
-        btnLoadContacts.setOnClickListener {
+        Toast.makeText(this,"Loading Contacts",Toast.LENGTH_SHORT).show()
             loadContacts()
-        }
+
+
 
         searchContacts.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
                 filterContacts(s.toString())
-
-
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -106,11 +114,15 @@ class ChatActivity : AppCompatActivity() {
                 PERMISSIONS_REQUEST_READ_CONTACTS
             )
         } else {
-            val contacts = getContacts()
-            contactsList.clear()
-            contactsList.addAll(contacts)
-            Toast.makeText(this,"Contacts Loaded",Toast.LENGTH_SHORT).show()
-//            filterContacts(searchContacts.text.toString())
+            progressBar.visibility = View.VISIBLE
+            CoroutineScope(Dispatchers.Main).launch {
+                val contacts = withContext(Dispatchers.IO) { getContacts() }
+                contactsList.clear()
+                contactsList.addAll(contacts)
+                progressBar.visibility = View.GONE
+                Toast.makeText(this@ChatActivity,"Contacts Loaded",Toast.LENGTH_SHORT).show()
+            }
+
         }
     }
 
@@ -130,18 +142,12 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun filterContacts(query: String) {
-        if(query.isEmpty()) {
+        if (query.isEmpty()) {
             filteredContactsList.clear()
-        }
-        else {
+        } else {
             val filteredContacts = contactsList.filter {
-                it.name.contains(
-                    query,
-                    ignoreCase = true
-                ) || it.phoneNumber.replace("\\s".toRegex(), "")
-                    .contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
+                it.name.contains(query, ignoreCase = true) || it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
             }
-
             filteredContactsList.clear()
             filteredContactsList.addAll(filteredContacts)
         }
