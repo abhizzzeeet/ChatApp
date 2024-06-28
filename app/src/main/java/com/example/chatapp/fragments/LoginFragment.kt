@@ -75,9 +75,9 @@ class LoginFragment : Fragment() {
             login()
         }
 
-        btnGoogleSignIn.setOnClickListener {
-            signIn()
-        }
+//        btnGoogleSignIn.setOnClickListener {
+//            signIn()
+//        }
 
         return view
     }

@@ -23,6 +23,8 @@ import com.example.chatapp.MainActivity
 import com.example.chatapp.R
 import com.example.chatapp.contacts.Contact
 import com.example.chatapp.contacts.ContactsAdapter
+import com.example.chatapp.contacts.OnItemClickListener
+import com.example.chatapp.fragments.ChatFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -33,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : AppCompatActivity() , OnItemClickListener{
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var mAuth: FirebaseAuth
@@ -60,11 +62,12 @@ class ChatActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
 
         recyclerViewContacts.layoutManager = LinearLayoutManager(this)
-        contactsAdapter = ContactsAdapter(filteredContactsList)
+        contactsAdapter = ContactsAdapter(filteredContactsList,this)
         recyclerViewContacts.adapter = contactsAdapter
 
         Toast.makeText(this,"Loading Contacts",Toast.LENGTH_SHORT).show()
             loadContacts()
+
 
 
 
@@ -121,6 +124,7 @@ class ChatActivity : AppCompatActivity() {
                 contactsList.addAll(contacts)
                 progressBar.visibility = View.GONE
                 Toast.makeText(this@ChatActivity,"Contacts Loaded",Toast.LENGTH_SHORT).show()
+                Log.d("Contacts List", "$contactsList")
             }
 
         }
@@ -155,7 +159,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun getContacts(): List<Contact> {
-        val contacts = mutableListOf<Contact>()
+        val contacts = HashSet<Contact>()
         val resolver: ContentResolver = contentResolver
         val cursor = resolver.query(
             ContactsContract.Contacts.CONTENT_URI,
@@ -203,6 +207,14 @@ class ChatActivity : AppCompatActivity() {
         }
 
         cursor?.close()
-        return contacts
+        return contacts.toList()
+    }
+
+    override fun onItemClick(contact: Contact) {
+        val chatFragment = ChatFragment(contact.name, contact.phoneNumber)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.chatActivityContainer, chatFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
