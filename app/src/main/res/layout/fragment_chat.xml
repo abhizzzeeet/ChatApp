@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.ChatFragment">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -18,7 +19,17 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" >
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginRight="15dp"
+                android:background="@color/primaryColor"
+                android:contentDescription="Back"
+                android:src="@drawable/ic_back"
+                app:tint="@color/backgroundColor" />
 
             <TextView
                 android:id="@+id/nameTextView"
@@ -26,8 +37,8 @@
                 android:layout_height="wrap_content"
                 android:background="@color/primaryColor"
                 android:text="name"
-                android:textSize="25dp"
-                android:textColor="@color/backgroundColor">
+                android:textColor="@color/backgroundColor"
+                android:textSize="25dp">
 
             </TextView>
         </androidx.appcompat.widget.Toolbar>
@@ -35,11 +46,60 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_above="@id/message_input_container"
+        android:layout_below="@id/header"
+        android:clipToPadding="false"
+        android:padding="5dp"
+        android:scrollbars="vertical" />
 
-    </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/invite_button"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_button"
+        android:text="Invite"
+        android:textSize="20dp"
+        android:visibility="gone"/>
 
 
+    <LinearLayout
+        android:id="@+id/message_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#B3E5FC"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone">
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/message_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:background="@android:color/white"
+            android:hint="Type a message"
+            android:padding="8dp"
+            android:textColor="#212121"
+            android:textColorHint="#757575" />
+
+        <ImageView
+            android:id="@+id/send_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="#B3E5FC"
+            android:contentDescription="Send"
+            android:src="@drawable/ic_send"
+            app:tint="#0288D1" />
+    </LinearLayout>
+</RelativeLayout>
+
+
