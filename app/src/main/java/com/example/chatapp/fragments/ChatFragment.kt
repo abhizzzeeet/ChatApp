@@ -28,7 +28,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ChatFragment(private val name: String , private val  phoneNumber: String) : Fragment() {
+class ChatFragment(private val name: String , private val  phoneNumber: String, private var receiverId: String?) : Fragment() {
 
     private lateinit var nameTextView: TextView
     private lateinit var messageInputContainer: LinearLayout
@@ -43,7 +43,7 @@ class ChatFragment(private val name: String , private val  phoneNumber: String) 
     var userExists: Boolean = false
     private val messagesList = mutableListOf<Message>()
     private var senderId: String?=null
-    private var receiverId: String?=null
+//    private var receiverId: String?=null
     var flag=0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,11 +60,11 @@ class ChatFragment(private val name: String , private val  phoneNumber: String) 
     ): View? {
         // Inflate the layout for this fragment
         println("$name , $phoneNumber ")
+
         val view =inflater.inflate(R.layout.fragment_chat, container, false)
 
         nameTextView = view.findViewById(R.id.nameTextView)
         messageInputContainer = view.findViewById(R.id.message_input_container)
-        inviteButton = view.findViewById(R.id.invite_button)
         sendButton = view.findViewById(R.id.send_button)
         messageEditText = view.findViewById(R.id.message_edit_text)
         messagesRecyclerView = view.findViewById(R.id.message_recycler_view)
@@ -82,43 +82,43 @@ class ChatFragment(private val name: String , private val  phoneNumber: String) 
             Log.d("ChatFragment2", "UserId: $senderId")
         })
 
-        Log.d("ChatFragment", "User ID: $senderId")
+        Log.d("SenderId ChatFragment", "$senderId")
+        Log.d("ReceiverId ChatFragment","$receiverId")
 
 
 
-        checkPhoneNumberInDatabase(phoneNumber){userExists ->
-            if(userExists){
-                // Check if chatId is provided (for existing chats) or create new chatId
-                var chatId = arguments?.getString("chatId")
-//        var chatId: String?=null
 
-                if (chatId != null) {
-                    // ChatId is provided (existing chat)
-                    messagesReference = messagesReference.child(chatId)
-                }
-                else {
-                    // ChatId is not provided (new chat)
-                    // Assuming you want to create a new chatId and store messages
-                    val newChatRef = messagesReference.push() // Generate new chatId
-                    val newChatId = newChatRef.key // Get the generated chatId
-                    if (newChatId != null) {
-                        flag=1
-                        chatId=newChatId.toString()
-                        messagesReference =
-                            newChatRef // Reference messages under new chatId
-                        chatsReference = chatsReference.child(newChatId)
-                    }
-                    else{
-                        Log.d("ERROR ChatFragment ", "ERROR in creating chatId")
-                    }
-                }
-                sendButton.setOnClickListener {
-                    sendMessage(chatId)
-                }
-                listenForMessages()
+//                // Check if chatId is provided (for existing chats) or create new chatId
+//                var chatId = arguments?.getString("chatId")
+////        var chatId: String?=null
+//
+//                if (chatId != null) {
+//                    // ChatId is provided (existing chat)
+//                    messagesReference = messagesReference.child(chatId)
+//                }
+//                else {
+//                    // ChatId is not provided (new chat)
+//                    // Assuming you want to create a new chatId and store messages
+//                    val newChatRef = messagesReference.push() // Generate new chatId
+//                    val newChatId = newChatRef.key // Get the generated chatId
+//                    if (newChatId != null) {
+//                        flag=1
+//                        chatId=newChatId.toString()
+//                        messagesReference =
+//                            newChatRef // Reference messages under new chatId
+//                        chatsReference = chatsReference.child(newChatId)
+//                    }
+//                    else{
+//                        Log.d("ERROR ChatFragment ", "ERROR in creating chatId")
+//                    }
+//                }
+//                sendButton.setOnClickListener {
+//                    sendMessage(chatId)
+//                }
+//                listenForMessages()
+//
+//
 
-            }
-        }
 
         return view
     }

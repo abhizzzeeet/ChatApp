@@ -28,25 +28,33 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ChatActivity : AppCompatActivity() , OnItemClickListener{
+class ChatActivity : AppCompatActivity() , OnItemClickListener {
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var mAuth: FirebaseAuth
     private lateinit var btnLogout: Button
-//    private lateinit var btnLoadContacts: Button
+
+    //    private lateinit var btnLoadContacts: Button
     private lateinit var recyclerViewContacts: RecyclerView
     private lateinit var searchContacts: EditText
     private lateinit var progressBar: ProgressBar
     private lateinit var contactsAdapter: ContactsAdapter
     private val contactsList = mutableListOf<Contact>()
     private val filteredContactsList = mutableListOf<Contact>()
-
+    private lateinit var databaseReference: DatabaseReference
+    var userExists: Boolean = false
+    var receiverId: String?=null
 
     companion object {
         private const val PERMISSIONS_REQUEST_READ_CONTACTS = 100
@@ -62,13 +70,13 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
         progressBar = findViewById(R.id.progressBar)
 
         recyclerViewContacts.layoutManager = LinearLayoutManager(this)
-        contactsAdapter = ContactsAdapter(filteredContactsList,this)
+        contactsAdapter = ContactsAdapter(filteredContactsList, this)
         recyclerViewContacts.adapter = contactsAdapter
+        databaseReference = FirebaseDatabase.getInstance().getReference("users")
 
 
-
-        Toast.makeText(this,"Loading Contacts",Toast.LENGTH_SHORT).show()
-            loadContacts()
+        Toast.makeText(this, "Loading Contacts", Toast.LENGTH_SHORT).show()
+        loadContacts()
 
 
 
@@ -111,7 +119,8 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
     private fun loadContacts() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
             ActivityCompat.requestPermissions(
                 this,
@@ -125,7 +134,7 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
                 contactsList.clear()
                 contactsList.addAll(contacts)
                 progressBar.visibility = View.GONE
-                Toast.makeText(this@ChatActivity,"Contacts Loaded",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChatActivity, "Contacts Loaded", Toast.LENGTH_SHORT).show()
                 Log.d("Contacts List", "$contactsList")
             }
 
@@ -152,7 +161,11 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
             filteredContactsList.clear()
         } else {
             val filteredContacts = contactsList.filter {
-                it.name.contains(query, ignoreCase = true) || it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
+                it.name.contains(
+                    query,
+                    ignoreCase = true
+                ) || it.phoneNumber.replace("\\s".toRegex(), "")
+                    .contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
             }
             filteredContactsList.clear()
             filteredContactsList.addAll(filteredContacts)
@@ -171,7 +184,8 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
         cursor?.use { cursor ->
             val idColumnIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID)
             val nameColumnIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-            val hasPhoneNumberColumnIndex = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
+            val hasPhoneNumberColumnIndex =
+                cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getString(idColumnIndex)
@@ -188,7 +202,8 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
                     )
 
                     phoneCursor?.use { phoneCursor ->
-                        val phoneNumberIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                        val phoneNumberIndex =
+                            phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
 
                         // Check if phoneNumberIndex is valid (-1 means column not found)
                         if (phoneNumberIndex == -1) {
@@ -199,7 +214,13 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
 
                         while (phoneCursor.moveToNext()) {
                             val phoneNumber = phoneCursor.getString(phoneNumberIndex)
-                            contacts.add(Contact(name, phoneNumber))
+                            checkPhoneNumberInDatabase(phoneNumber) { userExists,receiverId ->
+                                if (userExists) {
+                                    contacts.add(Contact(name, phoneNumber, true, receiverId))
+                                } else {
+                                    contacts.add(Contact(name, phoneNumber, false, null))
+                                }
+                            }
                         }
                     }
 
@@ -213,11 +234,52 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
     }
 
     override fun onItemClick(contact: Contact) {
-        val chatFragment = ChatFragment(contact.name, contact.phoneNumber)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.chatActivityContainer, chatFragment)
-            .addToBackStack(null)
-            .commit()
+        if(contact.isUser){
+            val chatFragment = ChatFragment(contact.name, contact.phoneNumber,contact.userId)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.chatActivityContainer, chatFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
     }
 
+    private fun stripPhoneNumber(phoneNumber: String): Pair<String, String> {
+        val cleanedNumber = phoneNumber.replace(" ", "").replace("-", "")
+        val lastTenDigits =
+            if (cleanedNumber.length >= 10) cleanedNumber.takeLast(10) else cleanedNumber
+        val countryCode = if (cleanedNumber.length > 10) cleanedNumber.dropLast(10) else ""
+        return Pair(countryCode, lastTenDigits)
+    }
+
+    private fun checkPhoneNumberInDatabase(phoneNumber: String, callback: (Boolean,String?) -> Unit) {
+        val (fragCountryCode, fragLastTenDigits) = stripPhoneNumber(phoneNumber)
+
+        databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                userExists = false
+                for (data in snapshot.children) {
+                    val dbPhoneNumber = data.child("phone").value.toString()
+                    val (dbCountryCode, dbLastTenDigits) = stripPhoneNumber(dbPhoneNumber)
+
+                    if (dbLastTenDigits == fragLastTenDigits) {
+                        userExists = true
+                        receiverId = data.key
+                        break
+                    }
+                }
+
+
+                callback(userExists,receiverId)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle possible errors.
+                Log.e("ERROR in checking user presence", "$error")
+                callback(false,null)
+
+            }
+
+        })
+    }
 }

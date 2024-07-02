@@ -56,17 +56,7 @@
         android:scrollbars="vertical" />
 
 
-    <Button
-        android:id="@+id/invite_button"
-        style="@style/ButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="8dp"
-        android:background="@drawable/rounded_button"
-        android:text="Invite"
-        android:textSize="20dp"
-        android:visibility="gone"/>
+
 
 
     <LinearLayout
@@ -76,8 +66,7 @@
         android:layout_alignParentBottom="true"
         android:background="#B3E5FC"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:visibility="gone">
+        android:padding="8dp">
 
         <EditText
             android:id="@+id/message_edit_text"
