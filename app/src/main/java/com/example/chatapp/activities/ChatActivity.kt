@@ -16,7 +16,6 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.MainActivity
@@ -48,6 +47,7 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
     private val contactsList = mutableListOf<Contact>()
     private val filteredContactsList = mutableListOf<Contact>()
 
+
     companion object {
         private const val PERMISSIONS_REQUEST_READ_CONTACTS = 100
     }
@@ -64,6 +64,8 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
         recyclerViewContacts.layoutManager = LinearLayoutManager(this)
         contactsAdapter = ContactsAdapter(filteredContactsList,this)
         recyclerViewContacts.adapter = contactsAdapter
+
+
 
         Toast.makeText(this,"Loading Contacts",Toast.LENGTH_SHORT).show()
             loadContacts()
@@ -217,4 +219,5 @@ class ChatActivity : AppCompatActivity() , OnItemClickListener{
             .addToBackStack(null)
             .commit()
     }
+
 }

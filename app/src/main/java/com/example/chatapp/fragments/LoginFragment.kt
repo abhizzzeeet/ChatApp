@@ -13,14 +13,13 @@ import android.widget.TextView
 import android.widget.Toast
 import com.example.chatapp.R
 import com.example.chatapp.activities.ChatActivity
+import com.example.chatapp.viewModels.SharedDataRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.FirebaseDatabase
 
 
 class LoginFragment : Fragment() {
@@ -38,6 +37,7 @@ class LoginFragment : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -51,6 +51,7 @@ class LoginFragment : Fragment() {
         btnLogin = view.findViewById<Button>(R.id.loginButton)
         btnGoogleSignIn = view.findViewById<Button>(R.id.googleSignInButton)
         tvDirectSignUp = view.findViewById<TextView>(R.id.signupTextView)
+
 
         auth = FirebaseAuth.getInstance()
 
@@ -92,6 +93,12 @@ class LoginFragment : Fragment() {
         {
             auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(requireActivity()) {
                 if (it.isSuccessful) {
+                    val user = auth.currentUser
+                    val userId = user?.uid
+                    if (userId != null) {
+                        SharedDataRepository.setMessage(userId.toString())
+                        Log.d("LoginFragment", "User ID: $userId")
+                    }
                     Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
                     val intent = Intent(requireContext(),ChatActivity::class.java)
                     startActivity(intent)
