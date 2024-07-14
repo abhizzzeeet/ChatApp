@@ -5,25 +5,13 @@
     android:id="@+id/chatActivityContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context=".activities.ChatActivity">
 
     <!-- Toolbar with Logout Button -->
-    <LinearLayout
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="?attr/colorPrimaryDark">
 
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LOGOUT"
-            android:textColor="@android:color/white"
-            android:background="@android:color/transparent" />
-    </LinearLayout>
+
+
 
     <!-- Content Layout -->
     <androidx.core.widget.NestedScrollView
@@ -38,6 +26,13 @@
             android:orientation="vertical"
             android:padding="8dp">
 
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:text="LOGOUT"
+                android:textColor="@android:color/black" />
             <!-- Search Contacts EditText -->
             <EditText
                 android:id="@+id/searchContacts"
@@ -75,8 +70,8 @@
                 android:id="@+id/chats_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Chats"
                 android:padding="8dp"
+                android:text="Chats"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:visibility="gone" />
@@ -93,8 +88,8 @@
                 android:id="@+id/other_contacts_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Other contacts"
                 android:padding="8dp"
+                android:text="Other contacts"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:visibility="gone" />
@@ -111,8 +106,8 @@
                 android:id="@+id/invite_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Invite to app"
                 android:padding="8dp"
+                android:text="Invite to app"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:visibility="gone" />
