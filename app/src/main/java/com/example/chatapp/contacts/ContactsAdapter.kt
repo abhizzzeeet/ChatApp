@@ -34,9 +34,9 @@ class ContactsAdapter(private val contacts: List<Contact>, private val listener 
 //        else{
 //            holder.inviteButton.visibility = View.VISIBLE
 //        }
-        holder.itemView.setOnClickListener{
-            listener.onItemClick(contact)
-        }
+//        holder.itemView.setOnClickListener{
+//            listener.onItemClick(contact)
+//        }
     }
 
     override fun getItemCount(): Int {

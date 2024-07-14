@@ -28,6 +28,11 @@ import com.example.chatapp.contacts.Contact
 import com.example.chatapp.contacts.ContactsAdapter
 import com.example.chatapp.contacts.OnItemClickListener
 import com.example.chatapp.fragments.ChatFragment
+import com.example.chatapp.models.PreviousChat
+import com.example.chatapp.models.User
+import com.example.chatapp.recyclerView.ChatsAdapter
+import com.example.chatapp.recyclerView.InviteToAppAdapter
+import com.example.chatapp.recyclerView.OtherContactsAdapter
 import com.example.chatapp.viewModels.SharedDataRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -53,10 +58,17 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var btnLogout: Button
 
-    private lateinit var recyclerViewContacts: RecyclerView
+    private lateinit var recyclerViewChats: RecyclerView
+    private lateinit var recyclerViewOtherContacts: RecyclerView
+    private lateinit var recyclerViewInvite: RecyclerView
+
+
     private lateinit var searchContacts: EditText
     private lateinit var progressBar: ProgressBar
     private lateinit var contactsAdapter: ContactsAdapter
+    private lateinit var chatsAdapter: ChatsAdapter
+    private lateinit var inviteToAppAdapter: InviteToAppAdapter
+    private lateinit var otherContactsAdapter: OtherContactsAdapter
     private val contactsList = mutableListOf<Contact>()
     private val filteredContactsList = mutableListOf<Contact>()
     private val recentChatsList = mutableListOf<Contact>()
@@ -79,7 +91,9 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
         setContentView(R.layout.activity_chat)
 
         searchContacts = findViewById(R.id.searchContacts)
-        recyclerViewContacts = findViewById(R.id.recyclerViewChatActivity)
+        recyclerViewChats = findViewById(R.id.recyclerViewChats)
+        recyclerViewOtherContacts = findViewById(R.id.recyclerViewOtherContacts)
+        recyclerViewInvite = findViewById(R.id.recyclerViewInvite)
         progressBar = findViewById(R.id.progressBar)
 
         progressBar = findViewById(R.id.progressBar)
@@ -89,9 +103,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
         progressBar.visibility = View.VISIBLE
         loadingText.visibility = View.VISIBLE
 
-        recyclerViewContacts.layoutManager = LinearLayoutManager(this)
-        contactsAdapter = ContactsAdapter(filteredContactsList, this)
-        recyclerViewContacts.adapter = contactsAdapter
+
         databaseReference = FirebaseDatabase.getInstance().getReference("users")
         chatsReference = FirebaseDatabase.getInstance().getReference("chats")
 
@@ -128,6 +140,21 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 //            // Step 3: Perform operations in parallel
             listOperations = ListOperations(previousChatsList, usersList, contactList)
             listOperations.performOperations()
+
+
+
+            recyclerViewChats.layoutManager = LinearLayoutManager(this@ChatActivity)
+            chatsAdapter = ChatsAdapter(previousChatsList, this@ChatActivity)
+            recyclerViewChats.adapter = chatsAdapter
+
+            recyclerViewOtherContacts.layoutManager = LinearLayoutManager(this@ChatActivity)
+            otherContactsAdapter = OtherContactsAdapter(usersList, this@ChatActivity)
+            recyclerViewOtherContacts.adapter = otherContactsAdapter
+
+            recyclerViewInvite.layoutManager = LinearLayoutManager(this@ChatActivity)
+            inviteToAppAdapter = InviteToAppAdapter(contactList, this@ChatActivity)
+            recyclerViewInvite.adapter = inviteToAppAdapter
+
 //
 //            // Step 4: Update loading progress
 //            updateLoadingProgress(100)
@@ -175,8 +202,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 //    }
 
 
-
-    override fun onItemClick(contact: Contact) {
+    override fun onPreviousChatItemClick(previousChat: PreviousChat) {
 //        if (contact.isUser) {
 //            val chatFragment = ChatFragment(contact.name, contact.phoneNumber, contact.userId)
 //            supportFragmentManager.beginTransaction()
@@ -185,6 +211,26 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 //                .commit()
 //        }
     }
+    override fun onOtherContactItemClick(user: User) {
+//        if (contact.isUser) {
+//            val chatFragment = ChatFragment(contact.name, contact.phoneNumber, contact.userId)
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.chatActivityContainer, chatFragment)
+//                .addToBackStack(null)
+//                .commit()
+//        }
+    }
+
+    override fun onInviteItemClick(contact: Contact) {
+//        if (contact.isUser) {
+//            val chatFragment = ChatFragment(contact.name, contact.phoneNumber, contact.userId)
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.chatActivityContainer, chatFragment)
+//                .addToBackStack(null)
+//                .commit()
+//        }
+    }
+
     private fun signOutAndStartSignInActivity() {
         mAuth.signOut()
 

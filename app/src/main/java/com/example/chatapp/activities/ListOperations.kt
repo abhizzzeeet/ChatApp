@@ -15,6 +15,8 @@ class ListOperations (
     ) {
 
         suspend fun performOperations() = coroutineScope {
+            Log.d("ListOperation","$previousChatList")
+            Log.d("ListOperation","$usersList")
             val removeUsersFromContactListDeferred = async(Dispatchers.IO) { removeUsersFromContactList(usersList) }
             val removeUsersFromUsersListDeferred = async(Dispatchers.IO) { removeUsersFromUsersList(previousChatList) }
 

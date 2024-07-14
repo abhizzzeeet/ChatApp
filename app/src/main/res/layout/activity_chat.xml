@@ -7,51 +7,87 @@
     android:layout_height="match_parent"
     tools:context=".activities.ChatActivity">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:fillViewport="true">
 
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LOGOUT" />
-
-        <!--    <Button-->
-        <!--        android:id="@+id/loadContacts"-->
-        <!--        android:layout_width="wrap_content"-->
-        <!--        android:layout_height="wrap_content"-->
-        <!--        android:text="Load Contacts" />-->
-
-        <EditText
-            android:id="@+id/searchContacts"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Contacts"
-            android:minHeight="48dp" />
+            android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LOGOUT" />
 
-        <TextView
-            android:id="@+id/loadingText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/progressBar"
-            android:layout_centerHorizontal="true"
-            android:padding="16dp"
-            android:text="Loading..."
-            android:textSize="16sp"
-            android:visibility="gone" />
+            <!--    <Button-->
+            <!--        android:id="@+id/loadContacts"-->
+            <!--        android:layout_width="wrap_content"-->
+            <!--        android:layout_height="wrap_content"-->
+            <!--        android:text="Load Contacts" />-->
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewChatActivity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            <EditText
+                android:id="@+id/searchContacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search Contacts"
+                android:minHeight="48dp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/loadingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/progressBar"
+                android:layout_centerHorizontal="true"
+                android:padding="16dp"
+                android:text="Loading..."
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chats"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewChats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Other contacts"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewOtherContacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Invite to app"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewInvite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
 </FrameLayout>
