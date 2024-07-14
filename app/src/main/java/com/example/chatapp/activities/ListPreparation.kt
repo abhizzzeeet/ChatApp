@@ -62,6 +62,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                 chatsReference.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         for (chatSnapshot in snapshot.children) {
+                            var chatId = chatSnapshot.key.toString()
                             val participants = chatSnapshot.child("participants").children
                             val lastMessage =
                                 chatSnapshot.child("lastMessage").getValue(String::class.java) ?: ""
@@ -87,7 +88,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                                 Log.d("True", "True")
                                 for (userId in otherParticipants) {
                                     fetchUserDetails(userId) { name, phoneNumber ->
-                                        previousChatsList.add(PreviousChat(name, phoneNumber, lastMessage))
+                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber, lastMessage))
                                         Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                     }
                                 }
@@ -117,7 +118,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                         val id = data.key
                         val name = data.child("name").getValue(String::class.java).toString()
                         val phoneNumber = data.child("phone").getValue(String::class.java).toString()
-                        usersList.add(User(name, phoneNumber))
+                        usersList.add(User(id.toString(), name, phoneNumber))
                     }
                     continuation.resume(usersList)
                     Log.d("UsersList", "$usersList")
@@ -144,8 +145,9 @@ class ListPreparation(private val senderId: String?, private val context: Contex
         usersReference.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(userSnapshot: DataSnapshot) {
                 val name = userSnapshot.child("name").getValue(String::class.java).orEmpty()
-                val phoneNumber = userSnapshot.child("phoneNumber").getValue(String::class.java).orEmpty()
+                val phoneNumber = userSnapshot.child("phone").getValue(String::class.java).orEmpty()
                 Log.d("Name", "$name")
+                Log.d("PhoneNumber", "$phoneNumber")
                 callback(name, phoneNumber)
             }
 
