@@ -9,6 +9,7 @@ import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -37,6 +38,7 @@ import com.example.chatapp.viewModels.SharedDataRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -92,6 +94,8 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var usersList: MutableList<User>
     private lateinit var contactList: MutableList<Contact>
 
+    private lateinit var loadingBottomSheet: BottomSheetDialog
+
     companion object {
         private const val PERMISSIONS_REQUEST_READ_CONTACTS = 100
     }
@@ -99,6 +103,8 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        mAuth = FirebaseAuth.getInstance()
 
         searchContacts = findViewById(R.id.searchContacts)
         chatsTextView = findViewById(R.id.chats_textview)
@@ -109,19 +115,24 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
         recyclerViewInvite = findViewById(R.id.recyclerViewInvite)
         progressBar = findViewById(R.id.progressBar)
 
+        // Initialize BottomSheetDialog
+        loadingBottomSheet = BottomSheetDialog(this)
+        val bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_loading, null)
+        loadingBottomSheet.setContentView(bottomSheetView)
+        loadingBottomSheet.setCancelable(false)
+        loadingBottomSheet.show()
+
         progressBar = findViewById(R.id.progressBar)
         loadingText = findViewById(R.id.loadingText)
 
-        // Show loading UI
-        progressBar.visibility = View.VISIBLE
-        loadingText.visibility = View.VISIBLE
+
 
 
         databaseReference = FirebaseDatabase.getInstance().getReference("users")
         chatsReference = FirebaseDatabase.getInstance().getReference("chats")
 
 
-        mAuth = FirebaseAuth.getInstance()
+
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -181,13 +192,12 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 //            // Step 4: Update loading progress
 //            updateLoadingProgress(100)
 //
-//            // Now you can use previousChatList, usersList, and contactList as needed
-//            // Example: Update UI with filtered contactList
-//            // contactsAdapter.updateList(contactList)
+
 //
 //            // Hide loading UI when tasks complete
 //            progressBar.visibility = View.GONE
 //            loadingText.visibility = View.GONE
+            loadingBottomSheet.dismiss()
         }
 
 
@@ -210,6 +220,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
     private fun filterContacts(query: String) {
         if (query.isEmpty()) {
+            filteredPreviousChatsList.clear()
             filteredPreviousChatsList.addAll(previousChatsList)
             filteredUsersList.clear()
             filteredContactList.clear()
@@ -247,22 +258,20 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
 
     override fun onPreviousChatItemClick(previousChat: PreviousChat) {
-//        if (contact.isUser) {
-//            val chatFragment = ChatFragment(contact.name, contact.phoneNumber, contact.userId)
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.chatActivityContainer, chatFragment)
-//                .addToBackStack(null)
-//                .commit()
-//        }
+            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.chatActivityContainer, chatFragment)
+                .addToBackStack(null)
+                .commit()
+
     }
     override fun onOtherContactItemClick(user: User) {
-//        if (contact.isUser) {
-//            val chatFragment = ChatFragment(contact.name, contact.phoneNumber, contact.userId)
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.chatActivityContainer, chatFragment)
-//                .addToBackStack(null)
-//                .commit()
-//        }
+            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.chatActivityContainer, chatFragment)
+                .addToBackStack(null)
+                .commit()
+
     }
 
     override fun onInviteItemClick(contact: Contact) {
@@ -276,6 +285,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private fun signOutAndStartSignInActivity() {
+
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
