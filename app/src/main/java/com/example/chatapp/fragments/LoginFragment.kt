@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.example.chatapp.R
 import com.example.chatapp.activities.ChatActivity
+
 import com.example.chatapp.viewModels.SharedDataRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -100,7 +101,7 @@ class LoginFragment : Fragment() {
                         Log.d("LoginFragment", "User ID: $userId")
                     }
                     Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(requireContext(),ChatActivity::class.java)
+                    val intent = Intent(requireContext(), ChatActivity::class.java)
                     startActivity(intent)
                 } else
                     Toast.makeText(requireContext(), "Log In failed ", Toast.LENGTH_SHORT).show()

@@ -28,13 +28,25 @@
             android:id="@+id/searchContacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Contacts" />
+            android:hint="Search Contacts"
+            android:minHeight="48dp" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/loadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/progressBar"
+            android:layout_centerHorizontal="true"
+            android:padding="16dp"
+            android:text="Loading..."
+            android:textSize="16sp"
             android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView

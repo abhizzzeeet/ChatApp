@@ -27,13 +27,13 @@ class ContactsAdapter(private val contacts: List<Contact>, private val listener 
         val contact = contacts[position]
         holder.contactName.text = contact.name
         holder.contactPhone.text = contact.phoneNumber
-        var isUser= contact.isUser
-        if(isUser){
-            holder.inviteButton.visibility = View.GONE
-        }
-        else{
-            holder.inviteButton.visibility = View.VISIBLE
-        }
+//        var isUser= contact.isUser
+//        if(isUser){
+//            holder.inviteButton.visibility = View.GONE
+//        }
+//        else{
+//            holder.inviteButton.visibility = View.VISIBLE
+//        }
         holder.itemView.setOnClickListener{
             listener.onItemClick(contact)
         }
