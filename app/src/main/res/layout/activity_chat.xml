@@ -55,9 +55,11 @@
                 android:visibility="gone" />
 
             <TextView
+                android:id="@+id/chats_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Chats"/>
+                android:text="Chats"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewChats"
@@ -66,9 +68,11 @@
                 android:nestedScrollingEnabled="false" />
 
             <TextView
+                android:id="@+id/other_contacts_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Other contacts"/>
+                android:text="Other contacts"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewOtherContacts"
@@ -77,9 +81,11 @@
                 android:nestedScrollingEnabled="false" />
 
             <TextView
+                android:id="@+id/invite_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Invite to app"/>
+                android:text="Invite to app"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewInvite"

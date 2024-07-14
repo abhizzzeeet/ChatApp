@@ -64,13 +64,18 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
 
     private lateinit var searchContacts: EditText
+    private lateinit var chatsTextView: TextView
+    private lateinit var otherContactsTextView: TextView
+    private lateinit var inviteTextView: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var contactsAdapter: ContactsAdapter
     private lateinit var chatsAdapter: ChatsAdapter
     private lateinit var inviteToAppAdapter: InviteToAppAdapter
     private lateinit var otherContactsAdapter: OtherContactsAdapter
     private val contactsList = mutableListOf<Contact>()
-    private val filteredContactsList = mutableListOf<Contact>()
+    private val filteredPreviousChatsList = mutableListOf<PreviousChat>()
+    private val filteredUsersList = mutableListOf<User>()
+    private val filteredContactList = mutableListOf<Contact>()
     private val recentChatsList = mutableListOf<Contact>()
     private lateinit var databaseReference: DatabaseReference
     private lateinit var chatsReference: DatabaseReference
@@ -82,6 +87,11 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
 //    private lateinit var progressBar: ProgressBar
     private lateinit var loadingText: TextView
+
+    private lateinit var previousChatsList: MutableList<PreviousChat>
+    private lateinit var usersList: MutableList<User>
+    private lateinit var contactList: MutableList<Contact>
+
     companion object {
         private const val PERMISSIONS_REQUEST_READ_CONTACTS = 100
     }
@@ -91,6 +101,9 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
         setContentView(R.layout.activity_chat)
 
         searchContacts = findViewById(R.id.searchContacts)
+        chatsTextView = findViewById(R.id.chats_textview)
+        otherContactsTextView = findViewById(R.id.other_contacts_textview)
+        inviteTextView = findViewById(R.id.invite_textview)
         recyclerViewChats = findViewById(R.id.recyclerViewChats)
         recyclerViewOtherContacts = findViewById(R.id.recyclerViewOtherContacts)
         recyclerViewInvite = findViewById(R.id.recyclerViewInvite)
@@ -131,7 +144,13 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
             Log.d("SenderId", "$senderId")
 
             listPreparation = ListPreparation(senderId,this@ChatActivity,lifecycleScope)
-            var (previousChatsList, usersList, contactList) = listPreparation.prepareLists()
+            val (previousChats, users, contacts) = listPreparation.prepareLists()
+
+            // Initialize the lateinit variables
+            previousChatsList = previousChats
+            usersList = users
+            contactList = contacts
+
             Log.d("PreviousChatSList","$previousChatsList")
 
             // Step 2: Update loading progress
@@ -141,18 +160,21 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
             listOperations = ListOperations(previousChatsList, usersList, contactList)
             listOperations.performOperations()
 
+            filteredPreviousChatsList.addAll(previousChatsList)
+            chatsTextView.visibility = if (filteredPreviousChatsList.isEmpty()) View.GONE else View.VISIBLE
+
 
 
             recyclerViewChats.layoutManager = LinearLayoutManager(this@ChatActivity)
-            chatsAdapter = ChatsAdapter(previousChatsList, this@ChatActivity)
+            chatsAdapter = ChatsAdapter(filteredPreviousChatsList, this@ChatActivity)
             recyclerViewChats.adapter = chatsAdapter
 
             recyclerViewOtherContacts.layoutManager = LinearLayoutManager(this@ChatActivity)
-            otherContactsAdapter = OtherContactsAdapter(usersList, this@ChatActivity)
+            otherContactsAdapter = OtherContactsAdapter(filteredUsersList, this@ChatActivity)
             recyclerViewOtherContacts.adapter = otherContactsAdapter
 
             recyclerViewInvite.layoutManager = LinearLayoutManager(this@ChatActivity)
-            inviteToAppAdapter = InviteToAppAdapter(contactList, this@ChatActivity)
+            inviteToAppAdapter = InviteToAppAdapter(filteredContactList, this@ChatActivity)
             recyclerViewInvite.adapter = inviteToAppAdapter
 
 //
@@ -169,15 +191,15 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
         }
 
 
-//        searchContacts.addTextChangedListener(object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-//
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                filterContacts(s.toString())
-//            }
-//
-//            override fun afterTextChanged(s: Editable?) {}
-//        })
+        searchContacts.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filterContacts(s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
     }
 
@@ -186,20 +208,42 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
 
 
-//    private fun filterContacts(query: String) {
-//        if (query.isEmpty()) {
-//            filteredContactsList.clear()
-//            filteredContactsList.addAll(recentChatsList)
-//        } else {
-//            val filteredContacts = contactsList.filter {
-//                it.name.contains(query, ignoreCase = true) ||
-//                        it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
-//            }
-//            filteredContactsList.clear()
-//            filteredContactsList.addAll(filteredContacts)
-//        }
-//        contactsAdapter.notifyDataSetChanged()
-//    }
+    private fun filterContacts(query: String) {
+        if (query.isEmpty()) {
+            filteredPreviousChatsList.addAll(previousChatsList)
+            filteredUsersList.clear()
+            filteredContactList.clear()
+        } else {
+            val filteredChat = previousChatsList.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
+            }
+            val filteredUser = usersList.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
+            }
+            val filteredContact = contactList.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        it.phoneNumber.replace("\\s".toRegex(), "").contains(query.replace("\\s".toRegex(), ""), ignoreCase = true)
+            }
+
+            filteredPreviousChatsList.clear()
+            filteredPreviousChatsList.addAll(filteredChat)
+
+            filteredUsersList.clear()
+            filteredUsersList.addAll(filteredUser)
+
+            filteredContactList.clear()
+            filteredContactList.addAll(filteredContact)
+
+        }
+        chatsTextView.visibility = if (filteredPreviousChatsList.isEmpty()) View.GONE else View.VISIBLE
+        otherContactsTextView.visibility = if (filteredUsersList.isEmpty()) View.GONE else View.VISIBLE
+        inviteTextView.visibility = if (filteredContactList.isEmpty()) View.GONE else View.VISIBLE
+        chatsAdapter.notifyDataSetChanged()
+        otherContactsAdapter.notifyDataSetChanged()
+        inviteToAppAdapter.notifyDataSetChanged()
+    }
 
 
     override fun onPreviousChatItemClick(previousChat: PreviousChat) {
