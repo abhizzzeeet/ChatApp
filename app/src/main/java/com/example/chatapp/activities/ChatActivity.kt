@@ -258,7 +258,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
 
     override fun onPreviousChatItemClick(previousChat: PreviousChat) {
-            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId)
+            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId,previousChat.chatId)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.chatActivityContainer, chatFragment)
                 .addToBackStack(null)
@@ -266,7 +266,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
     }
     override fun onOtherContactItemClick(user: User) {
-            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId)
+            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId, null)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.chatActivityContainer, chatFragment)
                 .addToBackStack(null)

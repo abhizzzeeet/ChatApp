@@ -28,7 +28,12 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ChatFragment(private val name: String , private val  phoneNumber: String, private var receiverId: String?) : Fragment() {
+class ChatFragment(
+    private val name: String,
+    private val phoneNumber: String,
+    private var receiverId: String?,
+    private var chatId: String?
+) : Fragment() {
 
     private lateinit var nameTextView: TextView
     private lateinit var messageInputContainer: LinearLayout
@@ -42,9 +47,10 @@ class ChatFragment(private val name: String , private val  phoneNumber: String, 
     private lateinit var chatsReference: DatabaseReference
     var userExists: Boolean = false
     private val messagesList = mutableListOf<Message>()
-    private var senderId: String?=null
-//    private var receiverId: String?=null
-    var flag=0
+    private var senderId: String? = null
+
+    //    private var receiverId: String?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         databaseReference = FirebaseDatabase.getInstance().getReference("users")
@@ -61,7 +67,7 @@ class ChatFragment(private val name: String , private val  phoneNumber: String, 
         // Inflate the layout for this fragment
         println("$name , $phoneNumber ")
 
-        val view =inflater.inflate(R.layout.fragment_chat, container, false)
+        val view = inflater.inflate(R.layout.fragment_chat, container, false)
 
         nameTextView = view.findViewById(R.id.nameTextView)
         messageInputContainer = view.findViewById(R.id.message_input_container)
@@ -71,65 +77,81 @@ class ChatFragment(private val name: String , private val  phoneNumber: String, 
 
 
         nameTextView.text = name
-        messagesRecyclerView.layoutManager = LinearLayoutManager(context)
-        messageAdapter = MessageAdapter(messagesList)
-        messagesRecyclerView.adapter = messageAdapter
 
 
         SharedDataRepository.getMessage().observe(viewLifecycleOwner, Observer { message ->
             Log.d("ChatFragment2", "Message: $message")
             senderId = message
             Log.d("ChatFragment2", "UserId: $senderId")
+            if(senderId !=null){
+                ChatFragmentOperations()
+            }
         })
 
-        Log.d("SenderId ChatFragment", "$senderId")
-        Log.d("ReceiverId ChatFragment","$receiverId")
 
 
 
 
-                // Check if chatId is provided (for existing chats) or create new chatId
-                var chatId = arguments?.getString("chatId")
-//        var chatId: String?=null
-
-                if (chatId != null) {
-                    // ChatId is provided (existing chat)
-                    messagesReference = messagesReference.child(chatId)
-                }
-                else {
-                    // ChatId is not provided (new chat)
-                    // Assuming you want to create a new chatId and store messages
-                    val newChatRef = messagesReference.push() // Generate new chatId
-                    val newChatId = newChatRef.key // Get the generated chatId
-                    if (newChatId != null) {
-                        flag=1
-                        chatId=newChatId.toString()
-                        messagesReference =
-                            newChatRef // Reference messages under new chatId
-                        chatsReference = chatsReference.child(newChatId)
-                    }
-                    else{
-                        Log.d("ERROR ChatFragment ", "ERROR in creating chatId")
-                    }
-                }
-                sendButton.setOnClickListener {
-                    sendMessage(chatId)
-                }
-                listenForMessages()
+        sendButton.setOnClickListener {
+            sendMessage(chatId)
+        }
+        listenForMessages()
 
 
 
 
         return view
     }
+    private fun ChatFragmentOperations(){
+        messagesRecyclerView.layoutManager = LinearLayoutManager(context)
+        messageAdapter = MessageAdapter(messagesList,senderId)
+        messagesRecyclerView.adapter = messageAdapter
 
-    private fun sendMessage(chatId:String?) {
+        if (chatId != null) {
+            // ChatId is provided (existing chat)
+            messagesReference = messagesReference.child(chatId.toString())
+            chatsReference = chatsReference.child(chatId.toString())
+            // Fetch existing messages first
+            messagesReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (messageSnapshot in snapshot.children) {
+                        val message = messageSnapshot.getValue(Message::class.java)
+                        if (message != null) {
+                            messagesList.add(message)
+                        }
+                    }
+                    Log.d("MessageFetched ChatFragment","$messagesList")
+                    messageAdapter.notifyDataSetChanged()
+                    messagesRecyclerView.scrollToPosition(messagesList.size - 1)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("ChatFragment", "Failed to load messages: ${error.message}")
+                }
+            })
+        } else {
+            // ChatId is not provided (new chat)
+            // Assuming you want to create a new chatId and store messages
+            val newChatRef = messagesReference.push() // Generate new chatId
+            val newChatId = newChatRef.key // Get the generated chatId
+            if (newChatId != null) {
+                chatId = newChatId.toString()
+                messagesReference =
+                    newChatRef // Reference messages under new chatId
+                chatsReference = chatsReference.child(newChatId)
+            } else {
+                Log.d("ERROR ChatFragment ", "ERROR in creating chatId")
+            }
+        }
+    }
+
+    private fun sendMessage(chatId: String?) {
         val messageText = messageEditText.text.toString().trim()
-        if (messageText.isNotEmpty() && senderId!=null) {
+        if (messageText.isNotEmpty() && senderId != null) {
             val messageId = messagesReference.push().key
             val timeStamp = System.currentTimeMillis()
             val message = Message("$senderId", messageText, timeStamp)
-            val chat= Chat(Participants("$senderId","$receiverId"),messageText,timeStamp)
+            val chat = Chat(Participants("$senderId", "$receiverId"), messageText, timeStamp)
             if (messageId != null) {
                 messagesReference.child(messageId).setValue(message)
                 chatsReference.setValue(chat)
@@ -147,6 +169,8 @@ class ChatFragment(private val name: String , private val  phoneNumber: String, 
                     messagesList.add(message)
                     messageAdapter.notifyItemInserted(messagesList.size - 1)
                     messagesRecyclerView.scrollToPosition(messagesList.size - 1)
+//                    val chat = Chat(Participants("$senderId", "$receiverId"), message.text, message.timestamp)
+//                    chatsReference.setValue(chat)
                 }
             }
 
@@ -156,7 +180,6 @@ class ChatFragment(private val name: String , private val  phoneNumber: String, 
             override fun onCancelled(error: DatabaseError) {}
         })
     }
-
 
 
 //    private fun stripPhoneNumber(phoneNumber: String): Pair<String, String> {
