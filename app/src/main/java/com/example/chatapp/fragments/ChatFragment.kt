@@ -95,10 +95,7 @@ class ChatFragment(
         sendButton.setOnClickListener {
             sendMessage(chatId)
         }
-        listenForMessages()
-
-
-
+//        listenForMessages()
 
         return view
     }
@@ -156,21 +153,27 @@ class ChatFragment(
                 messagesReference.child(messageId).setValue(message)
                 chatsReference.setValue(chat)
                 messageEditText.text.clear()
+                Log.d("Sended Message","$messageText")
+                messagesList.add(message)
+                Log.d("Received Message","${message.text}")
+                messageAdapter.notifyItemInserted(messagesList.size - 1)
+                messagesRecyclerView.scrollToPosition(messagesList.size - 1)
 
             }
         }
     }
 
     private fun listenForMessages() {
+        Log.d("Received Message","Entered listenForMessages")
         messagesReference.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val message = snapshot.getValue(Message::class.java)
                 if (message != null) {
                     messagesList.add(message)
+                    Log.d("Received Message","${message.text}")
                     messageAdapter.notifyItemInserted(messagesList.size - 1)
                     messagesRecyclerView.scrollToPosition(messagesList.size - 1)
-//                    val chat = Chat(Participants("$senderId", "$receiverId"), message.text, message.timestamp)
-//                    chatsReference.setValue(chat)
+
                 }
             }
 

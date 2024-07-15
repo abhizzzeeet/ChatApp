@@ -39,7 +39,7 @@ class MessageAdapter(private val messagesList: List<Message>, private val curren
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messagesList[position]
-        if(message!=null){
+        if (message != null && message.text.isNotEmpty() && message.senderId.isNotEmpty()) {
             if (holder is SenderViewHolder) {
                 holder.bind(message)
             } else if (holder is ReceiverViewHolder) {
@@ -71,8 +71,9 @@ class MessageAdapter(private val messagesList: List<Message>, private val curren
         private val messageTime: TextView = itemView.findViewById(R.id.message_time)
 
         fun bind(message: Message) {
-            Log.d("MessageSender MessageAdapter","${message.text}")
-            Log.d("MessageSender MessageAdapter","${message.senderId}")
+            Log.d("MessageReceiver MessageAdapter","${message.text}")
+            Log.d("MessageReceiver MessageAdapter","${message.senderId}")
+            Log.d("MessageReceiver MessageAdapter","${message.timestamp}")
             messageText.text = message.text
             messageTime.text = formatTime(message.timestamp)
         }
