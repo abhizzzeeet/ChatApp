@@ -1,0 +1,112 @@
+1. Users
+json
+Copy code
+{
+  "users": {
+    "userId1": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phoneNumber": "+1234567890"
+    },
+    "userId2": {
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "phoneNumber": "+0987654321"
+    }
+  }
+}
+2. Chats
+Store all participants in the participants field:
+
+json
+Copy code
+{
+  "chats": {
+    "chatId1": {
+      "participants": {
+        "userId1": true,
+        "userId2": true
+      },
+      "lastMessage": "Hello!",
+      "timestamp": 1622981234567
+    },
+    "chatId2": {
+      "participants": {
+        "userId1": true,
+        "userId3": true
+      },
+      "lastMessage": "How are you?",
+      "timestamp": 1622982234567
+    }
+  }
+}
+3. Messages
+Store only the senderId in messages:
+
+json
+Copy code
+{
+  "messages": {
+    "chatId1": {
+      "messageId1": {
+        "senderId": "userId1",
+        "text": "Hello!",
+        "timestamp": 1622981234567
+      },
+      "messageId2": {
+        "senderId": "userId2",
+        "text": "Hi!",
+        "timestamp": 1622982234567
+      }
+    },
+    "chatId2": {
+      "messageId1": {
+        "senderId": "userId1",
+        "text": "How are you?",
+        "timestamp": 1622982234567
+      },
+      "messageId2": {
+        "senderId": "userId3",
+        "text": "I am good, thanks!",
+        "timestamp": 1622983234567
+      }
+    }
+  }
+}
+4. Typing Status
+json
+Copy code
+{
+  "typingStatus": {
+    "chatId1": {
+      "userId1": false,
+      "userId2": true
+    },
+    "chatId2": {
+      "userId1": true,
+      "userId3": false
+    }
+  }
+}
+5. Notifications
+json
+Copy code
+{
+  "notifications": {
+    "userId1": {
+      "notificationId1": {
+        "type": "new_message",
+        "chatId": "chatId1",
+        "message": "You have a new message",
+        "timestamp": 1622981234567
+      }
+    }
+  }
+}
+Explanation
+Users: Contains basic user details: name, email, and phoneNumber.
+Chats: Lists participants for each chat and includes the last message and timestamp.
+Messages: Each message stores senderId, text, and timestamp. The receiver(s) can be inferred from the participants list in the chat.
+Typing Status: Indicates typing status for each chat.
+Notifications: Contains notifications for users.
+This simplified structure should fit your needs given that you are syncing contacts locally from the mobile phone.
