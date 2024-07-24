@@ -95,7 +95,7 @@ class ChatFragment(
         sendButton.setOnClickListener {
             sendMessage(chatId)
         }
-//        listenForMessages()
+
 
         return view
     }
@@ -163,73 +163,4 @@ class ChatFragment(
         }
     }
 
-    private fun listenForMessages() {
-        Log.d("Received Message","Entered listenForMessages")
-        messagesReference.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                val message = snapshot.getValue(Message::class.java)
-                if (message != null) {
-                    messagesList.add(message)
-                    Log.d("Received Message","${message.text}")
-                    messageAdapter.notifyItemInserted(messagesList.size - 1)
-                    messagesRecyclerView.scrollToPosition(messagesList.size - 1)
-
-                }
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
-            override fun onChildRemoved(snapshot: DataSnapshot) {}
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
-            override fun onCancelled(error: DatabaseError) {}
-        })
-    }
-
-
-//    private fun stripPhoneNumber(phoneNumber: String): Pair<String, String> {
-//        val cleanedNumber = phoneNumber.replace(" ", "").replace("-", "")
-//        val lastTenDigits = if (cleanedNumber.length >= 10) cleanedNumber.takeLast(10) else cleanedNumber
-//        val countryCode = if (cleanedNumber.length > 10) cleanedNumber.dropLast(10) else ""
-//        return Pair(countryCode, lastTenDigits)
-//    }
-//
-//    private fun checkPhoneNumberInDatabase(phoneNumber: String,callback: (Boolean) -> Unit) {
-//        val (fragCountryCode, fragLastTenDigits) = stripPhoneNumber(phoneNumber)
-//        Log.d("contryCode Extracted in fragment","$fragCountryCode")
-//
-//
-//
-//                    val dbPhoneNumber = data.child("phone").value.toString()
-//                    val (dbCountryCode, dbLastTenDigits) = stripPhoneNumber(dbPhoneNumber)
-//                    Log.d("phone numbers extracted from db", "$dbLastTenDigits")
-//
-//                    if (dbLastTenDigits == fragLastTenDigits) {
-//                        userExists = true
-//                        receiverId = data.key
-//                        Log.d("ReceiverId ", "$receiverId")
-//                        Log.d("Found user","Found user with number $dbLastTenDigits")
-//                        break
-//                    }
-//                    else{
-//                        Log.d("Chat Fragment","User Doesnt exist")
-//                    }
-//                }
-//
-//                if (userExists) {
-//                    messageInputContainer.visibility = View.VISIBLE
-//                    inviteButton.visibility = View.GONE
-//                } else {
-//                    messageInputContainer.visibility = View.GONE
-//                    inviteButton.visibility = View.VISIBLE
-//                }
-//                callback(userExists)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                // Handle possible errors.
-//                Log.e("ERROR in checking user presence", "$error")
-//                callback(false)
-//
-//            }
-//        })
-//    }
 }

@@ -59,7 +59,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
         scope.launch {
             val chatsReference = databaseReference.child("chats")
             val chatsListDeferred = scope.async {
-                chatsReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                chatsReference.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         for (chatSnapshot in snapshot.children) {
                             var chatId = chatSnapshot.key.toString()
@@ -97,7 +97,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        Log.d("ERROR", "$error")
+                        Log.d("ERROR prepare previous chats list", "$error")
                     }
                 })
             }
@@ -125,7 +125,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.e("ERROR", "$error")
+                    Log.e("ERROR prepare users list", "$error")
                     continuation.resume(mutableListOf())
                 }
             })
@@ -152,7 +152,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.d("ERROR", "$error")
+                Log.d("ERROR Fetch User Details", "$error")
             }
         })
     }

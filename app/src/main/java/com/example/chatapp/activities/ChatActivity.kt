@@ -1,9 +1,6 @@
 package com.example.chatapp.activities
 
-import android.content.ContentResolver
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
