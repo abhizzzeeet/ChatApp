@@ -1,5 +1,6 @@
 package com.example.chatapp.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -12,10 +13,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
+import com.example.chatapp.activities.PaymentActivity
 import com.example.chatapp.models.Chat
 import com.example.chatapp.models.Message
 import com.example.chatapp.models.Participants
@@ -32,7 +35,10 @@ class ChatFragment(
     private val name: String,
     private val phoneNumber: String,
     private var receiverId: String?,
-    private var chatId: String?
+    private var chatId: String?,
+    private val position: Int,
+    private var callback: OnBackListener
+
 ) : Fragment() {
 
     private lateinit var nameTextView: TextView
@@ -48,6 +54,13 @@ class ChatFragment(
     var userExists: Boolean = false
     private val messagesList = mutableListOf<Message>()
     private var senderId: String? = null
+    private var lastMessage: String? = null
+
+
+
+    interface OnBackListener {
+        fun onLastMessageUpdate(position: Int,lastMessage: String?)
+    }
 
     //    private var receiverId: String?=null
 
@@ -96,6 +109,20 @@ class ChatFragment(
             sendMessage(chatId)
         }
 
+        view.findViewById<ImageView>(R.id.backButton).setOnClickListener {
+            performBackOperations()
+        }
+
+        // Handle system back button press
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                performBackOperations()
+            }
+        })
+        view.findViewById<Button>(R.id.chatPayButton).setOnClickListener{
+            val intent = Intent(requireContext(),PaymentActivity::class.java)
+            startActivity(intent)
+        }
 
         return view
     }
@@ -115,6 +142,7 @@ class ChatFragment(
                         val message = messageSnapshot.getValue(Message::class.java)
                         if (message != null) {
                             messagesList.add(message)
+                            lastMessage = message.text
                         }
                     }
                     Log.d("MessageFetched ChatFragment","$messagesList")
@@ -155,6 +183,7 @@ class ChatFragment(
                 messageEditText.text.clear()
                 Log.d("Sended Message","$messageText")
                 messagesList.add(message)
+                lastMessage=message.text
                 Log.d("Received Message","${message.text}")
                 messageAdapter.notifyItemInserted(messagesList.size - 1)
                 messagesRecyclerView.scrollToPosition(messagesList.size - 1)
@@ -163,4 +192,11 @@ class ChatFragment(
         }
     }
 
+    private fun performBackOperations() {
+        // Perform your operations here before navigating back
+        // For example, save state or perform cleanup
+        callback.onLastMessageUpdate(position, lastMessage)
+        // Simulate back press to pop the fragment and return to ChatActivity
+        parentFragmentManager.popBackStack()
+    }
 }

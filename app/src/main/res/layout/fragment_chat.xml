@@ -45,12 +45,18 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <Button
+        android:id="@+id/chatPayButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:text="pay"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/message_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/message_input_container"
-        android:layout_below="@id/header"
+        android:layout_below="@id/chatPayButton"
         android:clipToPadding="false"
         android:padding="5dp"
         android:scrollbars="vertical" />

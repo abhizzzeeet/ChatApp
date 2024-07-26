@@ -1,5 +1,6 @@
 package com.example.chatapp.recyclerView
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,10 @@ import com.example.chatapp.contacts.Contact
 import com.example.chatapp.contacts.ContactsAdapter
 import com.example.chatapp.contacts.OnItemClickListener
 import com.example.chatapp.models.PreviousChat
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class ChatsAdapter(private val previousChats: List<PreviousChat>, private val listener : OnItemClickListener) : RecyclerView.Adapter<ChatsAdapter.ChatViewHolder>() {
     class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,10 +30,24 @@ class ChatsAdapter(private val previousChats: List<PreviousChat>, private val li
     }
 
     override fun onBindViewHolder(holder: ChatsAdapter.ChatViewHolder, position: Int) {
+        val chatsReference = FirebaseDatabase.getInstance().getReference("chats")
         val previousChat = previousChats[position]
         holder.chatName.text = previousChat.name
         holder.chatPhone.text = previousChat.phoneNumber
-        holder.chatLastMessage.text = previousChat.lastMessage
+
+        chatsReference.child(previousChat.chatId).child("lastMessage").addListenerForSingleValueEvent(object :
+            ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val lastMessage = dataSnapshot.getValue(String::class.java)
+
+                    holder.chatLastMessage.text = lastMessage
+
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("Firebase", "Error fetching last message: ${databaseError.message}")
+
+                }
+            })
         holder.inviteButton.visibility = View.GONE
 //        var isUser= contact.isUser
 //        if(isUser){
@@ -38,7 +57,7 @@ class ChatsAdapter(private val previousChats: List<PreviousChat>, private val li
 //            holder.inviteButton.visibility = View.VISIBLE
 //        }
         holder.itemView.setOnClickListener{
-            listener.onPreviousChatItemClick(previousChat)
+            listener.onPreviousChatItemClick(previousChat,position)
         }
     }
 

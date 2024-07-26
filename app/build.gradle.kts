@@ -44,6 +44,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     //firebase
     implementation("com.google.firebase:firebase-auth:23.0.0")
+    implementation("androidx.activity:activity:1.8.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -59,4 +60,8 @@ dependencies {
 
     //kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
+
+    // Stripe Android SDK
+    implementation("com.stripe:stripe-android:20.48.1")
+
 }

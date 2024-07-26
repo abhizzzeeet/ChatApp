@@ -38,6 +38,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
     private lateinit var usersReference: DatabaseReference
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var contactsContinuation: Continuation<MutableList<Contact>>? = null
+    private var previousChatsMap = mutableMapOf<String, PreviousChat>()
 
     suspend fun prepareLists(): Triple<MutableList<PreviousChat>, MutableList<User>, MutableList<Contact>> =
         coroutineScope {
@@ -46,11 +47,18 @@ class ListPreparation(private val senderId: String?, private val context: Contex
             val usersListDeferred = async(Dispatchers.IO) { prepareUsersList() }
             val contactListDeferred = async(Dispatchers.IO) { prepareContactList() }
 
+            var previousChatList = previousChatListDeferred.await()
+            var usersList = usersListDeferred.await()
+            var contactList = contactListDeferred.await()
+
+            previousChatList = previousChatList.toSet().toMutableList()
+            Log.d("prepareList PreviousChatList","$previousChatList")
             Triple(
-                previousChatListDeferred.await(),
-                usersListDeferred.await(),
-                contactListDeferred.await()
+                previousChatList,
+                usersList,
+                contactList
             )
+
         }
 
     private suspend fun preparePreviousChatList(senderId: String?): MutableList<PreviousChat> {
@@ -88,7 +96,13 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                                 Log.d("True", "True")
                                 for (userId in otherParticipants) {
                                     fetchUserDetails(userId) { name, phoneNumber ->
-                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber, lastMessage))
+                                        if (!previousChatsMap.containsKey(chatId)) {
+                                            previousChatsMap[chatId] = PreviousChat(chatId, userId, name, phoneNumber)
+                                            previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber))
+                                            Log.d("PreviousChatsListJustAfter", "$previousChatsList")
+                                            Log.d("PreviousChatsMap", "$previousChatsMap")
+                                        }
+                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber))
                                         Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                     }
                                 }
@@ -105,7 +119,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
             chatsListDeferred.await()
             Log.d("PreviousChatsListDeferred", "$previousChatsList")
         }
-        Log.d("PreviousChatsList", "$previousChatsList")
+        Log.d("Returned PreviousChatsList", "$previousChatsList")
         return previousChatsList
     }
 

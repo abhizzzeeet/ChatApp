@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class ChatActivity : AppCompatActivity(), OnItemClickListener {
+class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBackListener {
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var mAuth: FirebaseAuth
@@ -254,8 +254,8 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
     }
 
 
-    override fun onPreviousChatItemClick(previousChat: PreviousChat) {
-            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId,previousChat.chatId)
+    override fun onPreviousChatItemClick(previousChat: PreviousChat,position: Int) {
+            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId,previousChat.chatId,position,this@ChatActivity)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.chatActivityContainer, chatFragment)
                 .addToBackStack(null)
@@ -263,7 +263,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
 
     }
     override fun onOtherContactItemClick(user: User) {
-            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId, null)
+            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId, null, 0,this@ChatActivity)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.chatActivityContainer, chatFragment)
                 .addToBackStack(null)
@@ -303,6 +303,12 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener {
                 }
             }
         })
+    }
+
+    override fun onLastMessageUpdate(position: Int, lastMessage: String?) {
+        val viewHolder = recyclerViewChats.findViewHolderForAdapterPosition(position) as? ChatsAdapter.ChatViewHolder
+        viewHolder?.itemView?.findViewById<TextView>(R.id.chatLastMessage)?.text = lastMessage
+        Log.d("ChatActivity","$previousChatsList")
     }
 
 }
