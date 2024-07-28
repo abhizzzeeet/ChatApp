@@ -8,8 +8,17 @@
 
     tools:context=".activities.ChatActivity">
 
-    <!-- Toolbar with Logout Button -->
 
+    <!-- Toolbar with Menu Button -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/CustomToolbar"
+        app:popupTheme="@style/CustomPopupTheme" >
+
+    </androidx.appcompat.widget.Toolbar>
 
 
 
@@ -17,7 +26,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:layout_marginTop="?attr/actionBarSize">
 
         <!-- Vertical LinearLayout for Chat Content -->
         <LinearLayout
@@ -26,13 +36,6 @@
             android:orientation="vertical"
             android:padding="8dp">
 
-            <Button
-                android:id="@+id/logoutButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="LOGOUT"
-                android:textColor="@android:color/black" />
             <!-- Search Contacts EditText -->
             <EditText
                 android:id="@+id/searchContacts"

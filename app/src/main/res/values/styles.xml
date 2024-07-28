@@ -20,6 +20,27 @@
         <item name="android:textColor">@color/buttonTextColor</item>
     </style>
 
+    <style name="CustomToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="subtitleTextColor">@color/white</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <!-- Custom popup theme for menu items -->
+    <style name="CustomPopupTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- Custom Toolbar title text appearance -->
+    <style name="CustomToolbarTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>

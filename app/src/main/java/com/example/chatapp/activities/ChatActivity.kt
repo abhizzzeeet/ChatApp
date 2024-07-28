@@ -7,6 +7,9 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -14,6 +17,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
@@ -111,6 +115,18 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         recyclerViewOtherContacts = findViewById(R.id.recyclerViewOtherContacts)
         recyclerViewInvite = findViewById(R.id.recyclerViewInvite)
         progressBar = findViewById(R.id.progressBar)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+        supportActionBar?.title = "ChatApp"
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
 
         // Initialize BottomSheetDialog
         loadingBottomSheet = BottomSheetDialog(this)
@@ -129,19 +145,6 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         chatsReference = FirebaseDatabase.getInstance().getReference("chats")
 
 
-
-
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
-
-        btnLogout = findViewById(R.id.logoutButton)
-        btnLogout.setOnClickListener {
-            signOutAndStartSignInActivity()
-        }
 
 //        SharedDataRepository.getMessage().observe(this, Observer { message ->
 //            senderId = message
@@ -209,7 +212,28 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         })
 
     }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_chat_activity, menu)
+        return true
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_settings -> {
+                // Launch SettingsActivity or SettingsFragment
+                true
+            }
+
+            R.id.menu_logout -> {
+                // Launch AboutActivity or AboutFragment
+                signOutAndStartSignInActivity()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
 
 

@@ -61,7 +61,5 @@ dependencies {
     //kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
 
-    // Stripe Android SDK
-    implementation("com.stripe:stripe-android:20.48.1")
-
+    implementation("com.google.firebase:firebase-messaging:23.0.0")
 }

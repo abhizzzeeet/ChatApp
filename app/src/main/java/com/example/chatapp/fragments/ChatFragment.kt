@@ -18,7 +18,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
-import com.example.chatapp.activities.PaymentActivity
 import com.example.chatapp.models.Chat
 import com.example.chatapp.models.Message
 import com.example.chatapp.models.Participants
@@ -39,7 +38,7 @@ class ChatFragment(
     private val position: Int,
     private var callback: OnBackListener
 
-) : Fragment() {
+) : Fragment(R.layout.fragment_chat) {
 
     private lateinit var nameTextView: TextView
     private lateinit var messageInputContainer: LinearLayout
@@ -119,10 +118,7 @@ class ChatFragment(
                 performBackOperations()
             }
         })
-        view.findViewById<Button>(R.id.chatPayButton).setOnClickListener{
-            val intent = Intent(requireContext(),PaymentActivity::class.java)
-            startActivity(intent)
-        }
+
 
         return view
     }
