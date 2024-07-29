@@ -17,6 +17,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.chatapp.R
 import com.example.chatapp.models.Chat
 import com.example.chatapp.models.Message
@@ -29,6 +33,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import org.json.JSONObject
 
 class ChatFragment(
     private val name: String,
@@ -105,7 +110,10 @@ class ChatFragment(
 
 
         sendButton.setOnClickListener {
-            sendMessage(chatId)
+            if(messageEditText.text!=null){
+                sendMessage(chatId)
+            }
+
         }
 
         view.findViewById<ImageView>(R.id.backButton).setOnClickListener {
@@ -150,6 +158,7 @@ class ChatFragment(
                     Log.e("ChatFragment", "Failed to load messages: ${error.message}")
                 }
             })
+//            listenForNewMessages()
         } else {
             // ChatId is not provided (new chat)
             // Assuming you want to create a new chatId and store messages
@@ -160,10 +169,12 @@ class ChatFragment(
                 messagesReference =
                     newChatRef // Reference messages under new chatId
                 chatsReference = chatsReference.child(newChatId)
+//                listenForNewMessages()
             } else {
                 Log.d("ERROR ChatFragment ", "ERROR in creating chatId")
             }
         }
+        listenForNewMessages()
     }
 
     private fun sendMessage(chatId: String?) {
@@ -178,14 +189,41 @@ class ChatFragment(
                 chatsReference.setValue(chat)
                 messageEditText.text.clear()
                 Log.d("Sended Message","$messageText")
-                messagesList.add(message)
-                lastMessage=message.text
-                Log.d("Received Message","${message.text}")
-                messageAdapter.notifyItemInserted(messagesList.size - 1)
-                messagesRecyclerView.scrollToPosition(messagesList.size - 1)
+//                messagesList.add(message)
+//                lastMessage=message.text
+//                Log.d("Received Message","${message.text}")
+//                messageAdapter.notifyItemInserted(messagesList.size - 1)
+//                messagesRecyclerView.scrollToPosition(messagesList.size - 1)
+//                listenForNewMessages()
+
+                // Send FCM notification
+
+                sendNotification(receiverId, messageText)
 
             }
         }
+    }
+
+    private fun listenForNewMessages() {
+        Log.d("Listenfor newMessage","ListenForNewMessage")
+        messagesReference.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val message = snapshot.getValue(Message::class.java)
+                if (message != null) {
+                    messagesList.add(message)
+                    lastMessage = message.text
+                    messageAdapter.notifyItemInserted(messagesList.size - 1)
+                    messagesRecyclerView.scrollToPosition(messagesList.size - 1)
+                }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(snapshot: DataSnapshot) {}
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ChatFragment", "Failed to listen for new messages: ${error.message}")
+            }
+        })
     }
 
     private fun performBackOperations() {
@@ -195,4 +233,26 @@ class ChatFragment(
         // Simulate back press to pop the fragment and return to ChatActivity
         parentFragmentManager.popBackStack()
     }
+
+    private fun sendNotification(receiverId: String?, messageText: String) {
+//        val url = "https://<YOUR_FIREBASE_PROJECT_ID>.cloudfunctions.net/sendNotification" // Replace YOUR_FIREBASE_PROJECT_ID with your Firebase project ID
+
+        val url = "https://us-central1-chatapp-cbe0b.cloudfunctions.net/sendNotification"
+        val jsonObject = JSONObject()
+        jsonObject.put("receiverId", receiverId)
+        jsonObject.put("messageText", messageText)
+
+        val request = JsonObjectRequest(
+            Request.Method.POST, url, jsonObject,
+            Response.Listener { response ->
+                Log.d("FCM", "Notification sent successfully: $response")
+            },
+            Response.ErrorListener { error ->
+                Log.e("FCM", "Error sending notification: $error")
+            }
+        )
+
+        Volley.newRequestQueue(context).add(request)
+    }
+
 }

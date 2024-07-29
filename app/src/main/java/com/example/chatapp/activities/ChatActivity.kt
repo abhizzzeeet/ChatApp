@@ -46,6 +46,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -153,6 +154,17 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         CoroutineScope(Dispatchers.Main).launch {
             val senderId = getSenderId(this@ChatActivity)
             Log.d("SenderId", "$senderId")
+
+            if(senderId!=null){
+                FirebaseMessaging.getInstance().subscribeToTopic(senderId)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("FCM", "Subscribed to topic $senderId")
+                        }
+                    }
+            }
+
+
 
             listPreparation = ListPreparation(senderId,this@ChatActivity,lifecycleScope)
             val (previousChats, users, contacts) = listPreparation.prepareLists()
