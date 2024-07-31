@@ -174,6 +174,8 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             usersList = users
             contactList = contacts
 
+            // Sort the list based on the timestamp
+            previousChatsList.sortByDescending { it.lastMessageTimestamp }
             Log.d("PreviousChatSList","$previousChatsList")
 
             // Step 2: Update loading progress

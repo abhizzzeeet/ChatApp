@@ -55,6 +55,7 @@ class ChatFragment(
     private lateinit var messagesReference: DatabaseReference
     private lateinit var messageAdapter: MessageAdapter
     private lateinit var chatsReference: DatabaseReference
+    private lateinit var statusReference: DatabaseReference
     var userExists: Boolean = false
     private val messagesList = mutableListOf<Message>()
     private var senderId: String? = null
@@ -74,7 +75,7 @@ class ChatFragment(
         // Assume chatId is known or passed as argument
         messagesReference = FirebaseDatabase.getInstance().getReference("messages")
         chatsReference = FirebaseDatabase.getInstance().getReference("chats")
-
+        statusReference = FirebaseDatabase.getInstance().getReference("status")
     }
 
     override fun onCreateView(
@@ -131,6 +132,7 @@ class ChatFragment(
         return view
     }
     private fun ChatFragmentOperations(){
+
         messagesRecyclerView.layoutManager = LinearLayoutManager(context)
         messageAdapter = MessageAdapter(messagesList,senderId)
         messagesRecyclerView.adapter = messageAdapter
@@ -235,24 +237,58 @@ class ChatFragment(
     }
 
     private fun sendNotification(receiverId: String?, messageText: String) {
-//        val url = "https://<YOUR_FIREBASE_PROJECT_ID>.cloudfunctions.net/sendNotification" // Replace YOUR_FIREBASE_PROJECT_ID with your Firebase project ID
+        if (receiverId == null || senderId == null){
+            Log.d("SenderId or ReceiverId is null","SenderId or ReceiverId is null")
+            return
+        }
 
-        val url = "https://us-central1-chatapp-cbe0b.cloudfunctions.net/sendNotification"
-        val jsonObject = JSONObject()
-        jsonObject.put("receiverId", receiverId)
-        jsonObject.put("messageText", messageText)
+        statusReference.child(receiverId.toString()).child(senderId.toString()).child("chatOpen")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val chatOpen = snapshot.getValue(Boolean::class.java) ?: false
+                    if (!chatOpen) {
+                        // Send notification only if the chat fragment is not open
+                        val url = "https://us-central1-chatapp-cbe0b.cloudfunctions.net/sendNotification"
+                        val jsonObject = JSONObject()
+                        jsonObject.put("receiverId", receiverId)
+                        jsonObject.put("messageText", messageText)
 
-        val request = JsonObjectRequest(
-            Request.Method.POST, url, jsonObject,
-            Response.Listener { response ->
-                Log.d("FCM", "Notification sent successfully: $response")
-            },
-            Response.ErrorListener { error ->
-                Log.e("FCM", "Error sending notification: $error")
-            }
-        )
+                        val request = JsonObjectRequest(
+                            Request.Method.POST, url, jsonObject,
+                            Response.Listener { response ->
+                                Log.d("FCM", "Notification sent successfully: $response")
+                            },
+                            Response.ErrorListener { error ->
+                                Log.e("FCM", "Error sending notification: $error")
+                            }
+                        )
 
-        Volley.newRequestQueue(context).add(request)
+                        Volley.newRequestQueue(context).add(request)
+                    } else {
+                        Log.d("FCM", "Chat fragment is open, notification not sent.")
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FCM", "Failed to check chat status: ${error.message}")
+                }
+            })
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Set status to open when the fragment is resumed
+        setStatus(true)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Set status to closed when the fragment is paused
+        setStatus(false)
+    }
+
+    private fun setStatus(isOpen: Boolean) {
+        val statusMap = mapOf("chatOpen" to isOpen)
+        statusReference.child(senderId.toString()).child(receiverId.toString()).updateChildren(statusMap)
+    }
 }

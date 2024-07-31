@@ -97,12 +97,12 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                                 for (userId in otherParticipants) {
                                     fetchUserDetails(userId) { name, phoneNumber ->
                                         if (!previousChatsMap.containsKey(chatId)) {
-                                            previousChatsMap[chatId] = PreviousChat(chatId, userId, name, phoneNumber)
-                                            previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber))
+                                            previousChatsMap[chatId] = PreviousChat(chatId, userId, name, phoneNumber,timestamp)
+                                            previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber,timestamp))
                                             Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                             Log.d("PreviousChatsMap", "$previousChatsMap")
                                         }
-                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber))
+                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber,timestamp))
                                         Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                     }
                                 }

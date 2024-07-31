@@ -1,6 +1,7 @@
 package com.example.chatapp.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.Constants.TAG
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class SignUpFragment : Fragment() {
@@ -86,6 +89,19 @@ class SignUpFragment : Fragment() {
                         FirebaseDatabase.getInstance().getReference("users").child(it).setValue(userMap)
                             .addOnSuccessListener {
                                 Toast.makeText(requireContext(), "Signup successful", Toast.LENGTH_SHORT).show()
+                                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                    if (!task.isSuccessful) {
+                                        Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                                        return@addOnCompleteListener
+                                    }
+
+                                    // Get new FCM registration token
+                                    val token = task.result
+
+                                    // Update the token in the database
+                                    updateFcmToken(userId, token)
+                                }
+
                                 // Redirect to main activity
                                 parentFragmentManager.popBackStack()
                             }
@@ -97,6 +113,11 @@ class SignUpFragment : Fragment() {
                     Toast.makeText(requireContext(), "Signup failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+    private fun updateFcmToken(userId: String, token: String) {
+        val databaseReference = FirebaseDatabase.getInstance().getReference("users/$userId")
+        val updates = hashMapOf<String, Any>("fcmToken" to token)
+        databaseReference.updateChildren(updates)
     }
 
 

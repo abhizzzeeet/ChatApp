@@ -4,5 +4,6 @@ data class PreviousChat(
     val chatId: String,
     val receiverId: String,
     val name: String,
-    val phoneNumber: String
+    val phoneNumber: String,
+    var lastMessageTimestamp: Long
 )

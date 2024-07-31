@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ChatsAdapter(private val previousChats: List<PreviousChat>, private val listener : OnItemClickListener) : RecyclerView.Adapter<ChatsAdapter.ChatViewHolder>() {
+class ChatsAdapter(private val previousChats: MutableList<PreviousChat>, private val listener : OnItemClickListener) : RecyclerView.Adapter<ChatsAdapter.ChatViewHolder>() {
     class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val chatName: TextView = itemView.findViewById(R.id.chatName)
         val chatPhone: TextView = itemView.findViewById(R.id.chatPhone)
@@ -35,12 +35,17 @@ class ChatsAdapter(private val previousChats: List<PreviousChat>, private val li
         holder.chatName.text = previousChat.name
         holder.chatPhone.text = previousChat.phoneNumber
 
-        chatsReference.child(previousChat.chatId).child("lastMessage").addListenerForSingleValueEvent(object :
+        chatsReference.child(previousChat.chatId).addValueEventListener(object :
             ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val lastMessage = dataSnapshot.getValue(String::class.java)
-
+                    val lastMessage = dataSnapshot.child("lastMessage").getValue(String::class.java)
+                    val timestamp = dataSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
+                    previousChat.lastMessageTimestamp = timestamp
                     holder.chatLastMessage.text = lastMessage
+                    // After fetching the timestamp, sort the list and update the adapter
+//                    previousChats.sortByDescending { it.lastMessageTimestamp }
+//                    notifyDataSetChanged()
+
 
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
