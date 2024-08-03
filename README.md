@@ -7,3 +7,13 @@ App provides following features:
   -> Sends notification to receiver on sending message if the chat of sender is not opened in receiver's device
 
 Text Stack: Kotlin, NodeJs .
+      
+I have explained my project throudh a video demonstration below.     
+You can SignUp a user and then login. When you try to search a user by typing a text or mobile number on search box it will show three lists of matching users :      
+1. Chats : List of matching users with whom you have chatted with
+2. Other Contacts : List of matching users whom you have not chat with but are a user of app
+3. Invite to app: List of matching users who are in your local device contacts but are not user of app
+
+
+https://github.com/user-attachments/assets/37d5ed2c-6f30-4e1b-945f-51eab1c69794
+
