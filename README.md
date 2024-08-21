@@ -15,7 +15,7 @@ You can SignUp a user and then login. When you try to search a user by typing a 
 2. Other Contacts : List of matching users whom you have not chat with but are a user of app
 3. Invite to app: List of matching users who are in your local device contacts but are not user of app               
                  
-Steps to run app : 
+Steps to run app :                       
 -> Run the frontend folder in android studio by clicking Run button           
 -> For deploying a new function in firebase run the command "firebase deploy --only functions" in root directory , although I have already deployed a function in firebase for serverless architecture , so its not necessary
 
