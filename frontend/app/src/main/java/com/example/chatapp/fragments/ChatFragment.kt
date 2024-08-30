@@ -66,7 +66,7 @@ class ChatFragment(
 
 
     interface OnBackListener {
-        fun onLastMessageUpdate(position: Int,lastMessage: String?,newChat: PreviousChat)
+        fun onLastMessageUpdate(position: Int,lastMessage: String?,newChat: PreviousChat,flag: Int)
     }
 
     //    private var receiverId: String?=null
@@ -235,12 +235,12 @@ class ChatFragment(
     private fun performBackOperations() {
         val newChat= PreviousChat(chatId.toString(),receiverId.toString(),name,phoneNumber,lastMessage,timestamp)
         if(flag==1 && lastMessage!=null){
-            callback.onLastMessageUpdate(-1, lastMessage, newChat)
+            callback.onLastMessageUpdate(position, lastMessage, newChat,flag)
             // Simulate back press to pop the fragment and return to ChatActivity
             parentFragmentManager.popBackStack()
         }
         else{
-            callback.onLastMessageUpdate(position, lastMessage,newChat)
+            callback.onLastMessageUpdate(position, lastMessage,newChat,0)
             // Simulate back press to pop the fragment and return to ChatActivity
             parentFragmentManager.popBackStack()
         }

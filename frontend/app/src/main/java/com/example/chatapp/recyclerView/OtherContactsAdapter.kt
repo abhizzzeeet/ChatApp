@@ -11,7 +11,7 @@ import com.example.chatapp.contacts.OnItemClickListener
 import com.example.chatapp.models.User
 
 
-class OtherContactsAdapter(private val users: List<User>, private val listener : OnItemClickListener) : RecyclerView.Adapter<OtherContactsAdapter.OtherContactViewHolder>() {
+class OtherContactsAdapter(private val users: MutableList<User>, private val listener : OnItemClickListener) : RecyclerView.Adapter<OtherContactsAdapter.OtherContactViewHolder>() {
     class OtherContactViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val chatName: TextView = itemView.findViewById(R.id.chatName)
         val chatPhone: TextView = itemView.findViewById(R.id.chatPhone)
@@ -42,6 +42,10 @@ class OtherContactsAdapter(private val users: List<User>, private val listener :
 
     override fun getItemCount(): Int {
         return users.size
+    }
+    fun removeItem(position: Int) {
+        users.removeAt(position)  // Now this works because users is a MutableList
+        notifyItemRemoved(position)  // Notify the adapter about item removal
     }
 
 }

@@ -343,10 +343,12 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         })
     }
 
-    override fun onLastMessageUpdate(position: Int, lastMessage: String?, newChat: PreviousChat) {
-        if(position ==-1 && lastMessage!=null){
+    override fun onLastMessageUpdate(position: Int, lastMessage: String?, newChat: PreviousChat,flag: Int) {
+        if(flag==1 && lastMessage!=null){
             previousChatsList.add(newChat)
             Log.d("ChatActivity","newdata added")
+            otherContactsAdapter.removeItem(position)
+            removeUserAsync(usersList,newChat.name,newChat.phoneNumber)
             chatsAdapter.notifyDataSetChanged()
         }
         else{
@@ -355,6 +357,18 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             Log.d("ChatActivity","$previousChatsList")
         }
 
+    }
+
+    fun removeUserAsync(users: MutableList<User>, name: String, phoneNumber: String) {
+//        withContext(Dispatchers.Default) {
+            // Find the user with the given name and phone number
+            val userToRemove = users.find { it.name == name && it.phoneNumber == phoneNumber }
+
+            // If the user exists, remove them from the list
+            userToRemove?.let {
+                users.remove(it)
+            }
+//        }
     }
 
 }
