@@ -47,7 +47,6 @@ class LoginFragment : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -66,7 +65,7 @@ class LoginFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
 
-        tvDirectSignUp.setOnClickListener(){
+        tvDirectSignUp.setOnClickListener() {
             if (savedInstanceState == null) {
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, SignUpFragment())
@@ -99,9 +98,8 @@ class LoginFragment : Fragment() {
         val pass = etPass.text.toString()
         val mobileNo = etMobileNo.text.toString()
 
-        
-        if(email.isNotEmpty() || pass.isNotEmpty() || mobileNo.isNotEmpty())
-        {
+
+        if (email.isNotEmpty() || pass.isNotEmpty() || mobileNo.isNotEmpty()) {
             auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(requireActivity()) {
                 if (it.isSuccessful) {
                     val user = auth.currentUser
@@ -112,7 +110,11 @@ class LoginFragment : Fragment() {
 
                         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                             if (!task.isSuccessful) {
-                                Log.w(Constants.TAG, "Fetching FCM registration token failed", task.exception)
+                                Log.w(
+                                    Constants.TAG,
+                                    "Fetching FCM registration token failed",
+                                    task.exception
+                                )
                                 return@addOnCompleteListener
                             }
 
@@ -122,20 +124,23 @@ class LoginFragment : Fragment() {
                             // Update the token in the database
                             updateFcmToken(userId, token)
                         }
-                        val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
-                        val statusReference = databaseReference.child("status").child(userId.toString())
-                            statusReference.addListenerForSingleValueEvent(object : ValueEventListener{
-                                override fun onDataChange(dataSnapshot: DataSnapshot){
+                        val databaseReference: DatabaseReference =
+                            FirebaseDatabase.getInstance().reference
+                        val statusReference =
+                            databaseReference.child("status").child(userId.toString())
+                        statusReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
 
-                                    val updates = mutableMapOf<String, Any?>()
-                                    for (receiverSnapshot in dataSnapshot.children) {
-                                        val receiverId = receiverSnapshot.key
-                                        if (receiverId != null) {
-                                            updates["$receiverId/chatOpen"] = false
-                                        }
+                                val updates = mutableMapOf<String, Any?>()
+                                for (receiverSnapshot in dataSnapshot.children) {
+                                    val receiverId = receiverSnapshot.key
+                                    if (receiverId != null) {
+                                        updates["$receiverId/chatOpen"] = false
                                     }
+                                }
 
-                                    statusReference.updateChildren(updates).addOnCompleteListener { task ->
+                                statusReference.updateChildren(updates)
+                                    .addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
                                             Log.d(
                                                 "UpdateChatOpenValues",
@@ -149,25 +154,28 @@ class LoginFragment : Fragment() {
                                             )
                                         }
                                     }
-                                }
-                                override fun onCancelled(databaseError: DatabaseError) {
-                                    Log.e("UpdateChatOpenValues", "DatabaseError: ${databaseError.message}")
-                                }
-                            })
+                            }
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                Log.e(
+                                    "UpdateChatOpenValues",
+                                    "DatabaseError: ${databaseError.message}"
+                                )
+                            }
+                        })
 
                     }
-                    Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Successfully LoggedIn", Toast.LENGTH_SHORT)
+                        .show()
 
                     val intent = Intent(requireContext(), ChatActivity::class.java)
                     startActivity(intent)
-                } else{
+                } else {
                     Toast.makeText(requireContext(), "Log In failed ", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
-        else
-        {
-            Toast.makeText(requireContext(),"Please fill all fields",Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -193,7 +201,11 @@ class LoginFragment : Fragment() {
                 val account = task.getResult(ApiException::class.java)
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Google sign in failed: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -204,19 +216,26 @@ class LoginFragment : Fragment() {
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    Toast.makeText(requireContext(), "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Signed in as ${user?.displayName}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     startActivity(Intent(requireContext(), ChatActivity::class.java))
 
                 } else {
-                    Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
     }
+
     private fun updateFcmToken(userId: String, token: String) {
         val databaseReference = FirebaseDatabase.getInstance().getReference("users/$userId")
         val updates = hashMapOf<String, Any>("fcmToken" to token)
         databaseReference.updateChildren(updates)
     }
+
     companion object {
         private const val RC_SIGN_IN = 9001
     }

@@ -173,10 +173,10 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             previousChatsList = previousChats
             usersList = users
             contactList = contacts
-
+            Log.d("ChatActivity PreviousChats","$previousChats")
             // Sort the list based on the timestamp
             previousChatsList.sortByDescending { it.lastMessageTimestamp }
-            Log.d("PreviousChatSList","$previousChatsList")
+            Log.d("ChatActivity PreviousChatSList","$previousChatsList")
 
             // Step 2: Update loading progress
 //            updateLoadingProgress(50)
@@ -186,6 +186,7 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             listOperations.performOperations()
 
             filteredPreviousChatsList.addAll(previousChatsList)
+            Log.d("ChatActivity filteredPreviousChatSList","$filteredPreviousChatsList")
             chatsTextView.visibility = if (filteredPreviousChatsList.isEmpty()) View.GONE else View.VISIBLE
 
 
@@ -331,7 +332,27 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
     }
 
     private fun signOutAndStartSignInActivity() {
-
+        Log.d("ChatActivity","Inside signOutAndStartSignInActivity")
+        // Fetch and update the FCM token
+        senderId?.let {
+            val usersReference = databaseReference.child(senderId.toString())
+            Log.d("FCM","$usersReference")
+            Log.d("FCM","$senderId")
+            usersReference.child("fcmToken").get().addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Update FCM token to null
+                    usersReference.child("fcmToken").setValue(null).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("FCM", "FCM token updated to null successfully.")
+                        } else {
+                            Log.e("FCM", "Error updating FCM token: ${task.exception}")
+                        }
+                    }
+                }
+            }.addOnFailureListener { exception ->
+                Log.e("FCM", "Error fetching FCM token: $exception")
+            }
+        }
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
@@ -358,7 +379,6 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         if(flag==1 && lastMessage!=null){
             previousChatsList.add(newChat)
             Log.d("ChatActivity","newdata added")
-            otherContactsAdapter.removeItem(position)
             removeUserSync(usersList,newChat.name,newChat.phoneNumber)
             previousChatsList.sortByDescending { it.lastMessageTimestamp }
             filteredPreviousChatsList.clear()

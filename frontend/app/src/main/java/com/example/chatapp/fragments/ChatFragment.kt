@@ -256,7 +256,12 @@ class ChatFragment(
         statusReference.child(receiverId.toString()).child(senderId.toString()).child("chatOpen")
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val chatOpen = snapshot.getValue(Boolean::class.java) ?: false
+                    val chatOpen = if (snapshot.exists()) {
+                        snapshot.getValue(Boolean::class.java) ?: false
+                    } else {
+                        // If the snapshot does not exist, consider the chat as not open
+                        false
+                    }
                     if (!chatOpen) {
                         // Send notification only if the chat fragment is not open
                         val url = "https://us-central1-chatapp-cbe0b.cloudfunctions.net/sendNotification"
