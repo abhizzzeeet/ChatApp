@@ -292,20 +292,31 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
     }
 
 
-    override fun onPreviousChatItemClick(previousChat: PreviousChat,position: Int) {
-            val chatFragment = ChatFragment(previousChat.name, previousChat.phoneNumber, previousChat.receiverId,previousChat.chatId,position,this@ChatActivity)
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.chatActivityContainer, chatFragment)
-                .addToBackStack(null)
-                .commit()
+    override fun onPreviousChatItemClick(previousChat: PreviousChat, position: Int) {
+
+        searchContacts.text.clear()
+        val chatFragment = ChatFragment(
+            previousChat.name,
+            previousChat.phoneNumber,
+            previousChat.receiverId,
+            previousChat.chatId,
+            position,
+            this@ChatActivity
+        )
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.chatActivityContainer, chatFragment)
+            .addToBackStack(null)
+            .commit()
 
     }
     override fun onOtherContactItemClick(user: User) {
-            val chatFragment = ChatFragment(user.name, user.phoneNumber, user.userId, null, 0,this@ChatActivity)
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.chatActivityContainer, chatFragment)
-                .addToBackStack(null)
-                .commit()
+        searchContacts.text.clear()
+        val chatFragment =
+            ChatFragment(user.name, user.phoneNumber, user.userId, null, 0, this@ChatActivity)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.chatActivityContainer, chatFragment)
+            .addToBackStack(null)
+            .commit()
 
     }
 
@@ -348,18 +359,26 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             previousChatsList.add(newChat)
             Log.d("ChatActivity","newdata added")
             otherContactsAdapter.removeItem(position)
-            removeUserAsync(usersList,newChat.name,newChat.phoneNumber)
+            removeUserSync(usersList,newChat.name,newChat.phoneNumber)
+            previousChatsList.sortByDescending { it.lastMessageTimestamp }
+            filteredPreviousChatsList.clear()
+            filteredPreviousChatsList.addAll(previousChatsList)
             chatsAdapter.notifyDataSetChanged()
+
         }
-        else{
+        else if(lastMessage!=null){
             val viewHolder = recyclerViewChats.findViewHolderForAdapterPosition(position) as? ChatsAdapter.ChatViewHolder
             viewHolder?.itemView?.findViewById<TextView>(R.id.chatLastMessage)?.text = lastMessage
+            previousChatsList.sortByDescending { it.lastMessageTimestamp }
+            filteredPreviousChatsList.clear()
+            filteredPreviousChatsList.addAll(previousChatsList)
+            chatsAdapter.notifyDataSetChanged()
             Log.d("ChatActivity","$previousChatsList")
         }
 
     }
 
-    fun removeUserAsync(users: MutableList<User>, name: String, phoneNumber: String) {
+    fun removeUserSync(users: MutableList<User>, name: String, phoneNumber: String) {
 //        withContext(Dispatchers.Default) {
             // Find the user with the given name and phone number
             val userToRemove = users.find { it.name == name && it.phoneNumber == phoneNumber }
