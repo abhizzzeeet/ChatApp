@@ -42,7 +42,7 @@ class ChatsAdapter(
 
 
         val chatsReference = FirebaseDatabase.getInstance().getReference("chats")
-        chatsReference.child(previousChat.chatId).addValueEventListener(object :
+        chatsReference.child(previousChat.chatId).addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val lastMessage = dataSnapshot.child("lastMessage").getValue(String::class.java)

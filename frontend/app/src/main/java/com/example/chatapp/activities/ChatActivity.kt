@@ -375,8 +375,8 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
         })
     }
 
-    override fun onLastMessageUpdate(position: Int, lastMessage: String?, newChat: PreviousChat,flag: Int) {
-        if(flag==1 && lastMessage!=null){
+    override fun onLastMessageUpdate(position: Int, lastMessage: String?, newChat: PreviousChat) {
+        if(position==-1 && lastMessage!=null){
             previousChatsList.add(newChat)
             Log.d("ChatActivity","newdata added")
             removeUserSync(usersList,newChat.name,newChat.phoneNumber)
@@ -387,12 +387,17 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
 
         }
         else if(lastMessage!=null){
-            val viewHolder = recyclerViewChats.findViewHolderForAdapterPosition(position) as? ChatsAdapter.ChatViewHolder
-            viewHolder?.itemView?.findViewById<TextView>(R.id.chatLastMessage)?.text = lastMessage
-            previousChatsList.sortByDescending { it.lastMessageTimestamp }
-            filteredPreviousChatsList.clear()
-            filteredPreviousChatsList.addAll(previousChatsList)
-            chatsAdapter.notifyDataSetChanged()
+//            val viewHolder = recyclerViewChats.findViewHolderForAdapterPosition(position) as? ChatsAdapter.ChatViewHolder
+//            viewHolder?.itemView?.findViewById<TextView>(R.id.chatLastMessage)?.text = lastMessage
+            var position = previousChatsList.indexOfFirst { it.chatId == newChat.chatId }
+            if(position !=-1){
+                previousChatsList[position].lastMessage = lastMessage
+                previousChatsList[position].lastMessageTimestamp = newChat.lastMessageTimestamp
+                previousChatsList.sortByDescending { it.lastMessageTimestamp }
+                filteredPreviousChatsList.clear()
+                filteredPreviousChatsList.addAll(previousChatsList)
+                chatsAdapter.notifyDataSetChanged()
+            }
             Log.d("ChatActivity","$previousChatsList")
         }
 
@@ -409,5 +414,16 @@ class ChatActivity : AppCompatActivity(), OnItemClickListener,ChatFragment.OnBac
             }
 //        }
     }
+    fun listenUnseenMessage(){
+        var messagesReference = FirebaseDatabase.getInstance().getReference("messages");
+        messagesReference.addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
 
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
 }

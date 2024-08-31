@@ -67,7 +67,7 @@ class ListPreparation(private val senderId: String?, private val context: Contex
         scope.launch {
             val chatsReference = databaseReference.child("chats")
             val chatsListDeferred = scope.async {
-                chatsReference.addValueEventListener(object : ValueEventListener {
+                chatsReference.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         for (chatSnapshot in snapshot.children) {
                             var chatId = chatSnapshot.key.toString()
@@ -102,8 +102,6 @@ class ListPreparation(private val senderId: String?, private val context: Contex
                                             Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                             Log.d("PreviousChatsMap", "$previousChatsMap")
                                         }
-                                        previousChatsList.add(PreviousChat(chatId , userId ,name, phoneNumber,lastMessage,timestamp))
-                                        Log.d("PreviousChatsListJustAfter", "$previousChatsList")
                                     }
                                 }
                             }

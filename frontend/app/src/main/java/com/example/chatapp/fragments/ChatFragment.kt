@@ -66,7 +66,7 @@ class ChatFragment(
 
 
     interface OnBackListener {
-        fun onLastMessageUpdate(position: Int,lastMessage: String?,newChat: PreviousChat,flag: Int)
+        fun onLastMessageUpdate(position: Int,lastMessage: String?,newChat: PreviousChat)
     }
 
     //    private var receiverId: String?=null
@@ -187,14 +187,16 @@ class ChatFragment(
         if (messageText.isNotEmpty() && senderId != null) {
             val messageId = messagesReference.push().key
             val timeStamp = System.currentTimeMillis()
-            timestamp = timeStamp
             val message = Message("$senderId", messageText, timeStamp)
             val chat = Chat(Participants("$senderId", "$receiverId"), messageText, timeStamp)
             if (messageId != null) {
-                messagesReference.child(messageId).setValue(message)
-                chatsReference.setValue(chat)
-                messageEditText.text.clear()
-                Log.d("Sended Message","$messageText")
+                messagesReference.child(messageId).setValue(message).addOnSuccessListener {
+                    timestamp = timeStamp
+                    lastMessage = messageText
+                    chatsReference.setValue(chat)
+                    messageEditText.text.clear()
+                    Log.d("Sended Message","$messageText")
+                }
 //                messagesList.add(message)
 //                lastMessage=message.text
 //                Log.d("Received Message","${message.text}")
@@ -218,6 +220,7 @@ class ChatFragment(
                 if (message != null) {
                     messagesList.add(message)
                     lastMessage = message.text
+                    timestamp= message.timestamp
                     messageAdapter.notifyItemInserted(messagesList.size - 1)
                     messagesRecyclerView.scrollToPosition(messagesList.size - 1)
                 }
@@ -235,12 +238,12 @@ class ChatFragment(
     private fun performBackOperations() {
         val newChat= PreviousChat(chatId.toString(),receiverId.toString(),name,phoneNumber,lastMessage,timestamp)
         if(flag==1 && lastMessage!=null){
-            callback.onLastMessageUpdate(position, lastMessage, newChat,flag)
+            callback.onLastMessageUpdate(-1, lastMessage, newChat)
             // Simulate back press to pop the fragment and return to ChatActivity
             parentFragmentManager.popBackStack()
         }
         else{
-            callback.onLastMessageUpdate(position, lastMessage,newChat,0)
+            callback.onLastMessageUpdate(position, lastMessage,newChat)
             // Simulate back press to pop the fragment and return to ChatActivity
             parentFragmentManager.popBackStack()
         }
